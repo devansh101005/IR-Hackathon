@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Large / downloaded / generated artifacts (never commit)
+data/
+models/
+indexes/
+*.onnx
+*.pt
+*.bin
+*.safetensors
+*.jsonl.gz
+*.pkl
+*.npy
+*.npz
+# Note: results/ (small CSVs, PNGs) and queries/ (TSVs) are NOT ignored; commit them.
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Secrets
+.env
