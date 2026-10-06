@@ -1,0 +1,27 @@
+# Core (the IR engine itself only needs numpy)
+numpy>=1.26
+regex>=2023.0
+indic-transliteration>=2.3
+
+# Evaluation, plots, learning-to-rank and the gate
+pandas>=2.0
+matplotlib>=3.8
+scikit-learn>=1.3
+
+# Neural encoder (CPU is enough)
+# Tip: for a small CPU-only torch install use
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+torch>=2.2
+transformers>=4.40
+tokenizers>=0.15
+sentencepiece>=0.1.99
+onnx>=1.15
+onnxruntime>=1.17
+
+# Web demo
+fastapi>=0.110
+uvicorn>=0.27
+
+# Tests (rank_bm25 is only a reference check in tests/, never in the pipeline)
+pytest>=7.0
+rank_bm25>=0.2.2
