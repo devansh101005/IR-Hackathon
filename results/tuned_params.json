@@ -1,0 +1,8 @@
+{
+  "k1": 0.9,
+  "b": 0.5,
+  "w_dhvani": 2.0,
+  "w_soundex": 2.0,
+  "w_title": 1.0,
+  "lambda_prox": 2.0
+}
