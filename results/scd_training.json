@@ -1,0 +1,31 @@
+{
+  "held_out_cosine_before": 0.7832627170558634,
+  "epochs": [
+    {
+      "epoch": 1,
+      "train_loss": 0.10544103436698818,
+      "held_out_cosine": 0.889141029838858
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.08735889817277591,
+      "held_out_cosine": 0.8978684770649877
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.07718758896520042,
+      "held_out_cosine": 0.9022629710620848
+    }
+  ],
+  "vocab_full": 250002,
+  "vocab_pruned": 43366,
+  "params_full": 117653760,
+  "params_pruned": 38292096,
+  "size_mb": {
+    "full_fp32": 448.4638433456421,
+    "full_int8": 112.62633419036865,
+    "pruned_fp32": 145.72311782836914,
+    "pruned_int8": 36.94115352630615
+  },
+  "seconds": 844.8606770038605
+}
