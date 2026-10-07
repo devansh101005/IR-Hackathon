@@ -1,0 +1,10 @@
+variant,distinct_keys,surface_words_per_key,ndcg@10_F1,ndcg@10_F2,ndcg@10_F3,csc@10,worst_ndcg@10
+all rules (Dhvani),100839,2.648,0.5445,0.4811,0.4879,0.7741,0.4516
+without merge_aspiration,111942,2.387,0.5468,0.4945,0.4791,0.7598,0.4424
+without merge_retroflex,111891,2.387,0.5465,0.3821,0.3875,0.6509,0.3513
+without drop_vowels,219235,1.229,0.518,0.166,0.1233,0.3185,0.1059
+without merge_wv,101689,2.626,0.5444,0.4813,0.4799,0.7628,0.443
+without merge_zj,101232,2.638,0.5445,0.479,0.4822,0.7547,0.4436
+without merge_fp,101841,2.623,0.5445,0.4801,0.4858,0.7713,0.4495
+without nasal_rule,101007,2.644,0.5439,0.4716,0.4784,0.7672,0.4418
+without collapse_doubles,113486,2.362,0.5421,0.4837,0.4882,0.7883,0.4562

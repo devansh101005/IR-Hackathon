@@ -1,0 +1,10 @@
+{
+  "documents": 110855,
+  "tokens": 8081081,
+  "vocabulary": 274129,
+  "terms_seen_once": 151995,
+  "top40_df_terms_in_stop_list": 35,
+  "share_of_tokens_roman": 0.0121,
+  "share_of_docs_with_roman_words": 0.1859,
+  "avg_tokens_per_doc": 72.9
+}
