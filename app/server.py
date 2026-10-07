@@ -206,6 +206,9 @@ def results():
         "corpus": read_json("e3_corpus_stats.json"),
         "significance": read_csv("significance.csv"),
         "human": read_csv("human_invariance.csv"),
+        "human_metrics": read_csv("human_metrics.csv"),
+        "agreement": read_json("e12_annotator_agreement.json"),
+        "word_examples": read_csv("e12_word_examples.csv"),
     }
 
 

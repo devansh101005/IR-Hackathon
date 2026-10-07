@@ -12,6 +12,6 @@ The PDF asks for a short note on who worked on what (for information only, no ma
 ## What actually happened (filled in at the end, must be accurate)
 | Member | Contributions |
 |---|---|
-| Devansh Pandey | |
-| Anamika Pal | |
-| Abhinav Bachchas | |
+| Devansh Pandey | Idea and system design; the whole IR engine; the Dhvani key and pooled df; dense retrieval, distillation, pruning and cluster pruning; learning to rank; the gated cascade; the evaluation framework and metrics; CLI and web demo; README and report; annotated the human query set (60 romanised queries, code-mixed and English for rows 1–20); presents the problem, the live pipeline, Dhvani, the gate and the main results in the video |
+| Anamika Pal | Annotated the human query set on her own (60 romanised queries, code-mixed and English for rows 21–40); analysed the annotator-agreement results (`results/e12_annotator_agreement.json`, `e12_word_examples.csv`); presents them in the video |
+| Abhinav Bachchas | Annotated the human query set on his own (60 romanised queries, code-mixed and English for rows 41–60); reviewed the final results and plots; proofread the report; presents the human-set results and the live kal/khel limitation in the video |

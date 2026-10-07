@@ -27,15 +27,30 @@ const BRIDGE_GROUPS = [
   ["krishna", "krishn", "कृष्ण", "krisna"],
   ["gyan", "gyaan", "ज्ञान", "gyaana"],
 ];
+// [number, name, what it does, lecture topic, file]
 const STATIONS = [
-  ["01", "Tokenise", "Split by script with explicit Unicode ranges, so vowel signs stay inside their word.", "text/tokenize.py"],
-  ["02", "Normalise and stem", "NFC, nukta and nasal folding, case folding, stop words, a light Hindi suffix stemmer.", "text/normalize.py · stemmer.py"],
-  ["03", "Dhvani key", "Each word becomes a phonetic key shared by its Devanagari and Roman spellings.", "text/dhvani.py"],
-  ["04", "Inverted index", "Positional postings in zones: surface, title, Dhvani. Champion lists and skip pointers.", "index/inverted_index.py"],
-  ["05", "Score", "BM25 per zone with pooled df across spellings, then query-term proximity on the top 100.", "retrieval/bm25.py · proximity.py"],
-  ["06", "Gate", "A small model reads IR signals and decides whether the neural stage is worth running.", "cascade/gate.py"],
-  ["07", "Dense and fuse", "A distilled, int8 query encoder searches passage vectors; ranks merge with RRF.", "dense/scd.py · retrieval/rrf.py"],
+  ["01", "Tokenise", "Split the text into words, script by script, so Hindi vowel signs stay inside their word.", "Lecture: term vocabulary", "text/tokenize.py"],
+  ["02", "Normalise and stem", "Unicode clean-up, lower case, remove stop words (ka, hai, ...), cut common Hindi suffixes.", "Lecture: term vocabulary", "text/normalize.py · stemmer.py"],
+  ["03", "Dhvani key", "Turn each word into a sound key that is the same for its Devanagari and Roman spellings.", "Lecture: Soundex (our version)", "text/dhvani.py"],
+  ["04", "Inverted index", "For every term, a postings list of passages and word positions, in three zones: words, title, sound keys.", "Lecture: inverted index, zones", "index/inverted_index.py"],
+  ["05", "Score", "BM25 in each zone with pooled df, added with weights; then boost passages where query words are close.", "Lecture: scoring, proximity", "retrieval/bm25.py · proximity.py"],
+  ["06", "Gate", "A small model looks at how confident the fast search is and decides if the neural stage should run.", "Beyond syllabus: cascades", "cascade/gate.py"],
+  ["07", "Dense and fuse", "A small distilled encoder finds passages by meaning; the two ranked lists are merged (RRF).", "Beyond syllabus: dense retrieval", "dense/scd.py · retrieval/rrf.py"],
 ];
+
+// What each system in the picker does, in plain words, and which IR ideas it uses
+const SYSTEM_INFO = {
+  S3: ["LipiSetu, the main system. BM25 on the exact words, plus the Dhvani (sound) zone so Roman spellings match Devanagari text, pooled df, a title zone and a proximity boost. No neural model, answers in milliseconds.",
+       ["BM25", "Dhvani zone", "pooled df", "title zone", "proximity"]],
+  G1: ["The cascade. Runs S3 first, then a small gate model decides whether the slower neural stage is worth running for this query. Scroll the right panel to the Gate step to see the decision.",
+       ["S3", "gate (logistic regression)", "dense retrieval", "RRF fusion"]],
+  H1: ["The hybrid. Always runs both S3 and the distilled neural encoder, then merges the two ranked lists with reciprocal rank fusion.",
+       ["S3", "dense retrieval", "RRF fusion"]],
+  L1: ["Learning to rank. Takes candidates from S3 and the neural encoder and re-orders them with a model trained on the train split, using IR features (BM25 per zone, proximity, tf-idf, dense score, ...).",
+       ["learning to rank", "IR features", "dense retrieval"]],
+  B2: ["The obvious baseline. Converts a Roman query to Devanagari letter by letter, then runs normal BM25. Breaks on casual spellings: bharat becomes भरत (a name), not भारत (India).",
+       ["transliteration", "BM25"]],
+};
 
 let currentSystem = "S3";
 let systemsInfo = [];
@@ -175,9 +190,22 @@ async function renderSystemPicker() {
       document.querySelectorAll("#systemPicker button").forEach(function (b) {
         b.setAttribute("aria-checked", b === button ? "true" : "false");
       });
+      renderSystemInfo();
       if ($("query").value.trim()) runSearch();
     });
   });
+  renderSystemInfo();
+}
+
+function renderSystemInfo() {
+  const info = SYSTEM_INFO[currentSystem];
+  if (!info) { $("systemInfo").hidden = true; return; }
+  let html = "<b>" + escapeHtml(systemName(currentSystem)) + " (" + currentSystem + "):</b> " + escapeHtml(info[0]);
+  html += '<div class="ideas">';
+  for (const idea of info[1]) html += '<span class="pill">' + escapeHtml(idea) + "</span>";
+  html += "</div>";
+  $("systemInfo").innerHTML = html;
+  $("systemInfo").hidden = false;
 }
 
 // ---------- search ----------
@@ -215,16 +243,10 @@ function renderColumns(main, baseline) {
 }
 
 function renderColumn(data, label) {
-  const title = (label ? label + " · " : "") + systemName(data.system);
+  const badge = label ? '<span class="badge base">baseline</span>' : '<span class="badge ours">selected</span>';
   let html = '<div class="column">';
-  html += '<div class="column-head"><span class="column-title">' + escapeHtml(title) + "</span>"
-    + '<span class="column-meta">' + data.results.length + " passages · " + data.took_ms + " ms</span></div>";
-  const hasZones = data.results.length > 0 && data.results[0].breakdown && data.results[0].breakdown.all !== undefined;
-  if (hasZones) {
-    html += '<div class="breakdown-legend"><span><span class="swatch" style="background:var(--series-1)"></span>surface BM25</span>'
-      + '<span><span class="swatch" style="background:var(--series-2)"></span>Dhvani zone</span>'
-      + '<span><span class="swatch" style="background:var(--series-3)"></span>title + proximity</span></div>';
-  }
+  html += '<div class="column-head"><span class="column-title">' + escapeHtml(systemName(data.system)) + " (" + data.system + ")" + badge + "</span>"
+    + '<span class="column-meta">top ' + data.results.length + " · " + data.took_ms + " ms</span></div>";
   if (data.results.length === 0) html += '<p class="empty">Nothing matched.</p>';
   let top = 0;
   for (const result of data.results) top = Math.max(top, partsTotal(result.breakdown));
@@ -272,82 +294,103 @@ function scoreBar(b, top) {
 function scoreText(result) {
   const b = result.breakdown || {};
   if (b.all === undefined) return "score " + fmt(result.score, 4);
-  let text = "surface " + fmt(b.all, 2) + " · dhvani " + fmt(b.dhvani || 0, 2);
+  let text = "words " + fmt(b.all, 2) + " · sound " + fmt(b.dhvani || 0, 2);
   if (b.title !== undefined) text += " · title " + fmt(b.title, 2);
   if (b.proximity !== undefined) text += " · prox " + fmt(b.proximity, 2) + " (w " + b.window + ")";
   return text;
 }
 
-// ---------- trace panel ----------
+// ---------- trace panel: every step the engine took, with a plain-English line ----------
 function renderTrace(data) {
   const ex = data.explain || {};
-  let html = "";
-  let step = 1;
-  function stepHead(title) { return '<h4><span class="num">' + String(step++).padStart(2, "0") + "</span>" + title + "</h4>"; }
-
-  if (ex.tokens && ex.tokens.length) {
-    html += '<div class="trace-step">' + stepHead("Tokens · script " + escapeHtml(ex.script));
-    html += '<div class="scroll-x"><table><thead><tr><th>token</th><th>script</th><th>stem</th><th class="mono">dhvani</th></tr></thead><tbody>';
-    for (const t of ex.tokens) {
-      html += "<tr" + (t.stop ? ' class="stop" title="stop word"' : "") + "><td>" + escapeHtml(t.token) + '</td><td><span class="tag">' + t.script + "</span></td><td>"
-        + escapeHtml(t.stop ? "—" : t.stem) + '</td><td class="mono">' + escapeHtml(t.stop ? "—" : (t.dhvani || "·")) + "</td></tr>";
-    }
-    html += "</tbody></table></div></div>";
-  }
-
-  const zoneNames = { all: "surface", dhvani: "Dhvani", title: "title" };
-  const zoneKeys = Object.keys(ex.zones || {});
-  if (zoneKeys.length) {
-    let maxIdf = 0;
-    for (const z of zoneKeys) for (const row of ex.zones[z]) maxIdf = Math.max(maxIdf, row.idf || 0);
-    html += '<div class="trace-step">' + stepHead("Term statistics · BM25 idf");
-    html += '<div class="scroll-x"><table><thead><tr><th>zone</th><th>term</th><th class="num">df</th><th class="num">idf</th><th></th></tr></thead><tbody>';
-    for (const z of zoneKeys) {
-      if (z === "title") continue;
-      for (const row of ex.zones[z]) {
-        const width = maxIdf > 0 ? Math.round(((row.idf || 0) / maxIdf) * 60) : 0;
-        html += "<tr><td>" + zoneNames[z] + "</td><td" + (z === "dhvani" ? ' class="mono"' : "") + ">" + escapeHtml(row.term) + '</td><td class="num">'
-          + (row.df || 0).toLocaleString() + '</td><td class="num">' + fmt(row.idf || 0, 2) + '</td><td><span class="idf-bar" style="width:' + width + 'px"></span></td></tr>';
-      }
-    }
-    html += "</tbody></table></div></div>";
-  }
-
-  if (ex.pooled && ex.pooled.length) {
-    html += '<div class="trace-step">' + stepHead("Pooled df · Pirkola-style");
-    html += '<table><thead><tr><th>term</th><th class="num">own df</th><th class="num">pooled df</th></tr></thead><tbody>';
-    for (const row of ex.pooled) {
-      html += "<tr><td>" + escapeHtml(row.term) + '</td><td class="num">' + row.own_df.toLocaleString() + '</td><td class="num">' + row.pooled_df.toLocaleString() + "</td></tr>";
-    }
-    html += "</tbody></table></div>";
-  }
-
-  if (ex.postings && ex.postings.length) {
-    html += '<div class="trace-step">' + stepHead("Postings · Dhvani zone");
-    for (const p of ex.postings) {
-      let sample = "";
-      for (const s of p.sample) sample += escapeHtml(s.doc) + " tf " + s.tf + " @" + s.positions.join(",") + "  ";
-      html += '<div class="posting"><b>' + escapeHtml(p.key) + "</b> df " + p.df.toLocaleString() + " → " + sample + "</div>";
-    }
-    html += "</div>";
-  }
-
-  if (ex.gate) {
-    const g = ex.gate;
-    html += '<div class="trace-step">' + stepHead("Gate · run the neural stage?");
-    html += '<div class="meter" title="probability ' + fmt(g.probability, 2) + ", threshold " + fmt(g.threshold, 2) + '">'
-      + '<div class="meter-fill" style="width:' + Math.round(g.probability * 100) + '%"></div>'
-      + '<div class="meter-tick" style="left:calc(' + Math.round(g.threshold * 100) + '% - 1px)"></div></div>';
-    html += '<p class="gate-decision">' + (g.use_neural
-      ? "<b>Yes.</b> Probability " + fmt(g.probability, 2) + " is above the threshold " + fmt(g.threshold, 2) + ", so the dense stage ran and the lists were fused."
-      : "<b>No.</b> Probability " + fmt(g.probability, 2) + " is below the threshold " + fmt(g.threshold, 2) + ", so the sparse result was returned without neural inference.") + "</p>";
-    html += '<div class="posting">';
-    for (const name in g.features) html += escapeHtml(name) + " " + fmt(g.features[name], 2) + " · ";
-    html += "</div></div>";
-  }
-
+  const state = { step: 1 };
+  let html = '<p class="trace-title">What the engine did</p>'
+    + '<p class="trace-sub">Real values from the index for this query, step by step.</p>';
+  html += traceTokens(ex, state);
+  html += traceTerms(ex, state);
+  html += tracePooled(ex, state);
+  html += tracePostings(ex, state);
+  html += traceGate(ex, state);
   html += '<div class="trace-foot">' + escapeHtml(systemName(data.system)) + " · " + data.took_ms + " ms</div>";
   $("trace").innerHTML = html;
+}
+
+function stepHead(state, title, explain) {
+  const number = String(state.step).padStart(2, "0");
+  state.step += 1;
+  return '<h4><span class="num">' + number + "</span>" + title + '</h4><p class="explain">' + explain + "</p>";
+}
+
+function traceTokens(ex, state) {
+  if (!ex.tokens || ex.tokens.length === 0) return "";
+  let html = '<div class="trace-step">' + stepHead(state, "Split into words · script: " + escapeHtml(ex.script),
+    "Struck-out words are <b>stop words</b> (too common to help). <b>stem</b> is the word after suffix removal; <b>dhvani</b> is its sound key.");
+  html += '<div class="scroll-x"><table><thead><tr><th>word</th><th>script</th><th>stem</th><th class="mono">dhvani</th></tr></thead><tbody>';
+  for (const t of ex.tokens) {
+    html += "<tr" + (t.stop ? ' class="stop" title="stop word"' : "") + "><td>" + escapeHtml(t.token) + '</td><td><span class="tag">' + t.script + "</span></td><td>"
+      + escapeHtml(t.stop ? "—" : t.stem) + '</td><td class="mono">' + escapeHtml(t.stop ? "—" : (t.dhvani || "·")) + "</td></tr>";
+  }
+  return html + "</tbody></table></div></div>";
+}
+
+function traceTerms(ex, state) {
+  const zoneNames = { all: "words", dhvani: "sound", title: "title" };
+  const zoneKeys = Object.keys(ex.zones || {});
+  if (zoneKeys.length === 0) return "";
+  let maxIdf = 0;
+  for (const z of zoneKeys) for (const row of ex.zones[z]) maxIdf = Math.max(maxIdf, row.idf || 0);
+  let html = '<div class="trace-step">' + stepHead(state, "How rare is each term? (df and idf)",
+    "<b>df</b> = passages that contain the term (out of 110,855). <b>idf</b> = how much a match is worth: rare terms count more. A red <b>0</b> means that exact spelling never appears, so only the sound zone can match.");
+  html += '<div class="scroll-x"><table><thead><tr><th>zone</th><th>term</th><th class="num">df</th><th class="num">idf</th><th></th></tr></thead><tbody>';
+  for (const z of zoneKeys) {
+    if (z === "title") continue;
+    for (const row of ex.zones[z]) {
+      const width = maxIdf > 0 ? Math.round(((row.idf || 0) / maxIdf) * 60) : 0;
+      const zeroClass = (row.df || 0) === 0 ? " zero" : "";
+      html += "<tr><td>" + zoneNames[z] + "</td><td" + (z === "dhvani" ? ' class="mono"' : "") + ">" + escapeHtml(row.term) + '</td><td class="num' + zeroClass + '">'
+        + (row.df || 0).toLocaleString() + '</td><td class="num">' + fmt(row.idf || 0, 2) + '</td><td><span class="idf-bar" style="width:' + width + 'px"></span></td></tr>';
+    }
+  }
+  return html + "</tbody></table></div></div>";
+}
+
+function tracePooled(ex, state) {
+  if (!ex.pooled || ex.pooled.length === 0) return "";
+  let html = '<div class="trace-step">' + stepHead(state, "Pooled df (all spellings together)",
+    "Each spelling alone looks rare, which would inflate its idf. So every spelling uses the df of its whole sound class (<b>pooled df</b>) instead of its <b>own df</b>.");
+  html += '<table><thead><tr><th>term</th><th class="num">own df</th><th class="num">pooled df</th></tr></thead><tbody>';
+  for (const row of ex.pooled) {
+    html += "<tr><td>" + escapeHtml(row.term) + '</td><td class="num">' + row.own_df.toLocaleString() + '</td><td class="num">' + row.pooled_df.toLocaleString() + "</td></tr>";
+  }
+  return html + "</tbody></table></div>";
+}
+
+function tracePostings(ex, state) {
+  if (!ex.postings || ex.postings.length === 0) return "";
+  let html = '<div class="trace-step">' + stepHead(state, "Postings lists (sound zone)",
+    "The first entries of each key's postings list, read from the index: <b>passage id</b>, <b>tf</b> (times it appears) and <b>@ word positions</b>. Positions are used for the proximity boost.");
+  for (const p of ex.postings) {
+    let sample = "";
+    for (const s of p.sample) sample += escapeHtml(s.doc) + " tf " + s.tf + " @" + s.positions.join(",") + "  ";
+    html += '<div class="posting"><b>' + escapeHtml(p.key) + "</b> df " + p.df.toLocaleString() + " → " + sample + "</div>";
+  }
+  return html + "</div>";
+}
+
+function traceGate(ex, state) {
+  if (!ex.gate) return "";
+  const g = ex.gate;
+  let html = '<div class="trace-step">' + stepHead(state, "Gate: run the neural stage?",
+    "The gate reads signals from the fast search (how strong and clear the top score is, how many words matched only by sound, ...). The bar is its probability that the neural stage will help; the black tick is the threshold learned on the train split.");
+  html += '<div class="meter" title="probability ' + fmt(g.probability, 2) + ", threshold " + fmt(g.threshold, 2) + '">'
+    + '<div class="meter-fill" style="width:' + Math.round(g.probability * 100) + '%"></div>'
+    + '<div class="meter-tick" style="left:calc(' + Math.round(g.threshold * 100) + '% - 1px)"></div></div>';
+  html += '<p class="gate-decision">' + (g.use_neural
+    ? '<b class="yes">Yes.</b> Probability ' + fmt(g.probability, 2) + " is above the threshold " + fmt(g.threshold, 2) + ", so the neural stage ran and the two lists were merged."
+    : '<b class="no">No.</b> Probability ' + fmt(g.probability, 2) + " is below the threshold " + fmt(g.threshold, 2) + ", so the fast result was returned and no neural model ran.") + "</p>";
+  html += '<div class="posting">';
+  for (const name in g.features) html += escapeHtml(name) + " " + fmt(g.features[name], 2) + " · ";
+  return html + "</div></div>";
 }
 
 // ---------- same question, other script ----------
@@ -358,11 +401,13 @@ async function renderConsistency(query) {
   try {
     const data = await getJson("/api/consistency?q=" + encodeURIComponent(query) + "&system=" + currentSystem);
     if (!data.available || data.systems.length === 0) return;
-    let html = '<span class="label">Same question in Roman</span><span class="roman">' + escapeHtml(data.roman) + "</span>";
+    let html = '<span class="label">Same question, typed in Roman</span> <span class="roman">' + escapeHtml(data.roman) + "</span>";
+    html += '<div class="consistency-row">';
     for (const s of data.systems) {
-      html += "<span>" + escapeHtml(s.name) + ': top-10 overlap <span class="value">RBO ' + fmt(s.rbo, 2) + "</span> (" + s.shared_top10 + "/10 shared)</span>";
+      html += "<span><b>" + escapeHtml(s.name) + "</b>: " + s.shared_top10 + ' of the top 10 are the same · <span class="value">RBO ' + fmt(s.rbo, 2) + "</span></span>";
     }
-    html += '<button type="button" id="tryRoman">Search the Roman version</button>';
+    html += '<button type="button" id="tryRoman">Search the Roman version</button></div>';
+    html += '<p class="explain">We ran your question again in Roman letters and compared the two top-10 lists. RBO 1.0 = identical ranking, 0 = nothing in common. A script-invariant engine scores high here.</p>';
     box.innerHTML = html;
     box.hidden = false;
     $("tryRoman").addEventListener("click", function () {
@@ -377,7 +422,7 @@ function renderStations() {
   let html = "";
   for (const s of STATIONS) {
     html += '<li class="station"><div class="station-num">' + s[0] + '</div><div class="station-name">' + s[1]
-      + '</div><p class="station-text">' + s[2] + '</p><div class="station-file">' + s[3] + "</div></li>";
+      + '</div><p class="station-text">' + s[2] + '</p><p class="station-lecture">' + s[3] + '</p><div class="station-file">' + s[4] + "</div></li>";
   }
   $("line").innerHTML = html;
 }
@@ -411,6 +456,128 @@ function renderEvidence(data) {
   renderBudgetChart(data.budget || [], data.operating_point);
   renderAblation(data.ablation || []);
   renderEfficiency(data.efficiency || []);
+  renderTakeaways(data);
+  renderHuman(data);
+}
+
+// ---------- takeaways: one sentence per figure, every number read from results/ ----------
+function better(a, b) { return a > b ? "better than" : "not better than"; }
+
+function renderTakeaways(data) {
+  const main = data.main || [];
+  const b1Deva = metricValue(main, "B1", "F1", "ndcg@10");
+  const b1Roman = metricValue(main, "B1", "F2", "ndcg@10");
+  const s2Roman = metricValue(main, "S2", "F2", "ndcg@10");
+  const d0Roman = metricValue(main, "D0", "F2", "ndcg@10");
+  const l1Deva = metricValue(main, "L1", "F1", "ndcg@10");
+  if (b1Deva !== null && s2Roman !== null) {
+    $("takeawaySystems").innerHTML = "<b>Takeaway:</b> normal BM25 (B1) falls from " + fmt(b1Deva, 3) + " on Devanagari to "
+      + fmt(b1Roman, 3) + " on the same questions in Roman. With the Dhvani zone and pooled df (S2) Roman stays at " + fmt(s2Roman, 3)
+      + ". The plain neural model (D0) gets " + fmt(d0Roman, 3) + " on Roman: it matches script before meaning. Learning to rank (L1) is highest on Devanagari (" + fmt(l1Deva, 3) + ").";
+  }
+  const op = data.operating_point;
+  if (op) {
+    const gate = op["gate_ndcg@10"], sparse = op["always_sparse_ndcg@10"], neural = op["always_neural_ndcg@10"];
+    $("takeawayBudget").innerHTML = "<b>Takeaway:</b> with the threshold learned on train, the gate runs the neural stage for "
+      + Math.round(op.gate_neural_share * 100) + "% of queries and reaches " + fmt(gate, 3) + ", " + better(gate, sparse)
+      + " never running it (" + fmt(sparse, 3) + ") and " + better(gate, neural) + " always running it (" + fmt(neural, 3) + ").";
+  }
+  renderAblationTakeaway(data.ablation || []);
+  const eff = data.efficiency || [];
+  const s3 = findRow(eff, "system", "S3"), h1 = findRow(eff, "system", "H1"), g1 = findRow(eff, "system", "G1");
+  if (s3 && h1 && g1) {
+    $("takeawayEfficiency").innerHTML = "<b>Takeaway:</b> the sparse engine (S3) answers in " + fmt(s3.median_ms, 1)
+      + " ms. Always running the neural stage (H1) takes " + fmt(h1.median_ms, 1) + " ms; the gated cascade (G1) takes "
+      + fmt(g1.median_ms, 1) + " ms because most queries skip the neural stage.";
+  }
+}
+
+function renderAblationTakeaway(rows) {
+  if (rows.length < 2) return;
+  const full = rows[0];
+  let worst = rows[1];
+  for (const r of rows.slice(1)) if (Number(r["ndcg@10_F2"]) < Number(worst["ndcg@10_F2"])) worst = r;
+  const rule = worst.variant.replace("without ", "");
+  $("takeawayAblation").innerHTML = "<b>Takeaway:</b> switching off <b>" + escapeHtml(rule) + "</b> hurts most: Roman nDCG@10 falls from "
+    + fmt(full["ndcg@10_F2"], 3) + " to " + fmt(worst["ndcg@10_F2"], 3)
+    + ". Without it, a Roman spelling rarely gets the same key as the Devanagari word, because people write vowels in many different ways.";
+}
+
+// ---------- human query set ----------
+const HUMAN_FORMS = [["F1", "Devanagari"], ["H-R1", "Roman A1"], ["H-R2", "Roman A2"], ["H-R3", "Roman A3"], ["H-CM", "code-mixed"], ["H-EN", "English"]];
+const HUMAN_SYSTEMS = ["B1", "B2", "S0", "S3", "D0", "D1", "H1", "L1", "G1"];
+
+function renderHuman(data) {
+  const rows = data.human_metrics || [];
+  const agree = data.agreement;
+  if (rows.length === 0 || !agree) {
+    $("humanTiles").innerHTML = '<p class="empty">The human query set has not been evaluated yet.</p>';
+    return;
+  }
+  let tiles = tile("Questions typed by each of us", String(agree.queries_with_three_romanisations),
+    "3 people, " + agree.words_compared + " words compared");
+  tiles += tile("Words spelled the same by all three", Math.round(agree.same_spelling_all_three * 100) + "%",
+    "so " + Math.round((1 - agree.same_spelling_all_three) * 100) + "% of words were spelled differently by at least one of us");
+  tiles += tile("Words with the same Dhvani key", Math.round(agree.same_dhvani_key_all_three * 100) + "%",
+    "the sound key absorbs most of the differences");
+  tiles += tile("LipiSetu (S3) on our Roman typing", romanRange(rows, "S3"),
+    'baseline B2 <span class="from">' + romanRange(rows, "B2") + "</span> · nDCG@10");
+  $("humanTiles").innerHTML = tiles;
+  renderWordExamples(data.word_examples || []);
+  renderHumanTable(rows);
+  renderHumanTakeaway(rows);
+}
+
+function romanRange(rows, system) {
+  const values = [];
+  for (const form of ["H-R1", "H-R2", "H-R3"]) {
+    const value = metricValue(rows, system, form, "ndcg@10");
+    if (value !== null) values.push(value);
+  }
+  if (values.length === 0) return "—";
+  return fmt(Math.min.apply(null, values), 2) + "–" + fmt(Math.max.apply(null, values), 2);
+}
+
+function renderWordExamples(rows) {
+  if (rows.length === 0) { $("wordExamples").innerHTML = ""; return; }
+  let html = '<table class="data-table"><thead><tr><th>A1 · A2 · A3 typed</th><th>Dhvani keys</th><th>same key?</th></tr></thead><tbody>';
+  for (const r of rows.slice(0, 12)) {
+    const ok = r.keys_agree === "True";
+    html += '<tr><td class="mono">' + escapeHtml(r.spellings) + '</td><td class="mono">' + escapeHtml(r.dhvani_keys)
+      + '</td><td class="' + (ok ? "agree" : "disagree") + '">' + (ok ? "✓ yes" : "✗ no") + "</td></tr>";
+  }
+  $("wordExamples").innerHTML = html + "</tbody></table>";
+}
+
+function renderHumanTable(rows) {
+  const best = {};
+  for (const form of HUMAN_FORMS) {
+    best[form[0]] = 0;
+    for (const s of HUMAN_SYSTEMS) best[form[0]] = Math.max(best[form[0]], metricValue(rows, s, form[0], "ndcg@10") || 0);
+  }
+  let html = '<table class="data-table"><thead><tr><th>system</th><th></th>';
+  for (const form of HUMAN_FORMS) html += '<th class="num">' + form[1] + "</th>";
+  html += "</tr></thead><tbody>";
+  for (const s of HUMAN_SYSTEMS) {
+    if (metricValue(rows, s, "F1", "ndcg@10") === null) continue;
+    html += "<tr><td>" + s + "</td><td>" + escapeHtml(SYSTEM_LABELS[s]) + "</td>";
+    for (const form of HUMAN_FORMS) {
+      const value = metricValue(rows, s, form[0], "ndcg@10");
+      html += '<td class="num' + (value === best[form[0]] ? " best" : "") + '">' + fmt(value, 3) + "</td>";
+    }
+    html += "</tr>";
+  }
+  $("humanTable").innerHTML = html + "</tbody></table>";
+}
+
+function renderHumanTakeaway(rows) {
+  const s3Mixed = metricValue(rows, "S3", "H-CM", "ndcg@10");
+  const s3English = metricValue(rows, "S3", "H-EN", "ndcg@10");
+  const d1English = metricValue(rows, "D1", "H-EN", "ndcg@10");
+  $("takeawayHuman").innerHTML = "<b>Takeaway:</b> on how people really type, LipiSetu (S3) reaches " + romanRange(rows, "S3")
+    + " against " + romanRange(rows, "B2") + " for transliteration, so the results on generated queries hold. <b>Limitation:</b> code-mixed and English questions need meaning, not sound "
+    + "(<i>leader</i> does not sound like नेता): S3 gets only " + fmt(s3Mixed, 3) + " and " + fmt(s3English, 3)
+    + ", while the neural encoder (D1) gets " + fmt(d1English, 3) + " on English.";
 }
 
 function tile(label, value, compare) {

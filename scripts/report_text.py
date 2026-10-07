@@ -315,9 +315,11 @@ def section_work_division():
         "<p><b>Devansh Pandey</b>: idea and system design; text pipeline, inverted index, Boolean/phrase, tf-idf, BM25, "
         "proximity, top-K and champion lists; the Dhvani key and pooled df; dense retrieval, script-consistency "
         "distillation, vocabulary pruning, cluster pruning; learning to rank; the gated cascade; the evaluation "
-        "framework and metrics; the demo; the report. <b>Anamika Pal</b>: human query annotation and the "
-        "annotator-agreement analysis. <b>Abhinav Bachchas</b>: human query annotation, final evaluation runs and plots, "
-        "proofreading. <i>[Update to what actually happened before submitting.]</i></p>"
+        "framework and metrics; the demo; the report. <b>Anamika Pal</b>: annotated the human query set (60 romanised "
+        "queries, code-mixed and English versions of rows 21–40); analysed the annotator-agreement results and "
+        "presents them in the video. <b>Abhinav Bachchas</b>: annotated the human query set (60 romanised queries, "
+        "code-mixed and English versions of rows 41–60); reviewed the final results and plots and proofread the "
+        "report; presents the results and the live limitation in the video.</p>"
     )
 
 
@@ -325,7 +327,7 @@ def section_ai():
     return (
         "<h2>AI-use declaration</h2>"
         "<p>We used Claude Code (an AI coding assistant by Anthropic) to help brainstorm and plan the project, write "
-        "and refactor code, write tests and draft documentation. Devansh chose the track and the final idea, directed "
+        "and refactor code, write tests, run the experiments and draft documentation. Devansh chose the track and the final idea, directed "
         "the work, reviewed the code and checked the results. The human query annotations were written without AI "
         "tools. Every number in this report was produced by the scripts in the repository on the real data.</p>"
     )

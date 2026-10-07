@@ -7,8 +7,8 @@
   <meta name="description" content="One question, every script. A Hindi search engine that returns the same passages for Devanagari, Roman and code-mixed queries.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Devanagari:wght@400;500;600&family=Tiro+Devanagari+Hindi&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Hind:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css?v=3">
 </head>
 <body>
   <header class="topbar">
@@ -19,8 +19,11 @@
       </a>
       <nav class="nav" aria-label="Sections">
         <a href="#search">Search</a>
-        <a href="#pipeline">Pipeline</a>
+        <a href="#pipeline">How it works</a>
         <a href="#evidence">Evidence</a>
+        <a href="#human">Human queries</a>
+        <a href="#glossary">Glossary</a>
+        <a href="#team">Team</a>
         <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode">
           <span class="theme-dot"></span><span id="themeLabel">Dark</span>
         </button>
@@ -29,87 +32,208 @@
   </header>
 
   <main id="top">
+    <!-- 1. The problem -->
     <section class="hero wrap">
-      <p class="kicker">CSD358 · Track T5 · Multilingual and Indic search</p>
-      <h1>One question.<br><em>Every script.</em></h1>
-      <p class="lede">Most Hindi is typed in Roman letters, spelled a different way by every person. Most Hindi text is written in Devanagari. LipiSetu bridges the two with classic IR, so <span class="mono-inline">kal ka mausam</span> and <span lang="hi">कल का मौसम</span> find the same passages.</p>
+      <p class="kicker">CSD358 IR Hackathon · Track T5 · Multilingual and Indic search</p>
+      <h1>One question. <span class="accent">Every script.</span></h1>
+      <p class="lede">Most people type Hindi in Roman letters, and everyone spells it a little differently. Most Hindi text on the web is written in Devanagari. A normal search engine matches exact words, so <span class="mono-inline">kal ka mausam</span> finds nothing about <span lang="hi">कल का मौसम</span>. LipiSetu (लिपि = script, सेतु = bridge) fixes this with classic IR.</p>
 
-      <figure class="bridge" aria-label="Different spellings mapping to one Dhvani key">
-        <div class="bridge-words" id="bridgeWords"></div>
-        <svg class="bridge-lines" id="bridgeLines" viewBox="0 0 600 64" preserveAspectRatio="none" aria-hidden="true"></svg>
-        <div class="bridge-key"><span class="bridge-key-label">Dhvani key</span><span class="bridge-key-value" id="bridgeKey">···</span></div>
-        <figcaption>Every spelling of a word collapses to one phonetic key, indexed as its own zone. Keys are computed live by <code>text/dhvani.py</code>.</figcaption>
-      </figure>
+      <div class="hero-grid">
+        <figure class="bridge" aria-label="Different spellings mapping to one Dhvani key">
+          <p class="card-label">The core idea · Dhvani key (ध्वनि = sound)</p>
+          <div class="bridge-words" id="bridgeWords"></div>
+          <svg class="bridge-lines" id="bridgeLines" viewBox="0 0 600 64" preserveAspectRatio="none" aria-hidden="true"></svg>
+          <div class="bridge-key"><span class="bridge-key-label">same key</span><span class="bridge-key-value" id="bridgeKey">···</span></div>
+          <figcaption>Four spellings of one word, in two scripts, get the <b>same sound key</b>: consonant sounds are kept, vowels and aspiration are dropped. The key is stored as its own index zone, so a Roman query can match Devanagari passages. Keys are computed live by <code>text/dhvani.py</code>.</figcaption>
+        </figure>
+
+        <div class="howto">
+          <p class="card-label">How to use this page</p>
+          <ol class="howto-steps">
+            <li><b>Type a question</b> in any script, or click an example below the search box.</li>
+            <li><b>Pick a system</b>. LipiSetu (S3) is the main one; Transliterate + BM25 (B2) is the obvious baseline.</li>
+            <li><b>Read the right-hand panel</b>. It shows every step the engine took: tokens, sound keys, df and idf, real postings, and the gate decision.</li>
+            <li><b>Scroll down</b> for how it works, the measured results, the human query set and a glossary.</li>
+          </ol>
+        </div>
+      </div>
     </section>
 
+    <!-- 2. Live search -->
     <section class="search-section" id="search">
       <div class="wrap">
+        <div class="section-head">
+          <p class="kicker">Step 1 · Try it</p>
+          <h2>Search in any script</h2>
+          <p class="section-note">Runs the real engine on 110,855 Hindi Wikipedia passages (MIRACL). Nothing on this page is pre-computed except the Evidence charts, which are read from <code>results/</code>.</p>
+        </div>
         <form class="search-form" id="searchForm" autocomplete="off">
           <label class="visually-hidden" for="query">Search query</label>
-          <input id="query" name="q" type="search" placeholder="Type in any script — kal ka mausam, भारत का संविधान, congress party ka leader" spellcheck="false">
+          <input id="query" name="q" type="search" placeholder="kal ka mausam · भारत का संविधान · congress party ka leader" spellcheck="false">
           <button type="submit" class="search-button">Search</button>
         </form>
-        <div class="examples" id="examples" aria-label="Example queries"></div>
+        <div class="examples-row"><span class="examples-label">Examples</span><div class="examples" id="examples" aria-label="Example queries"></div></div>
         <div class="controls">
-          <div class="segmented" id="systemPicker" role="radiogroup" aria-label="Ranking system"></div>
-          <label class="compare-toggle"><input type="checkbox" id="compareToggle"> Compare with the baseline</label>
+          <div>
+            <p class="control-label">Ranking system</p>
+            <div class="segmented" id="systemPicker" role="radiogroup" aria-label="Ranking system"></div>
+          </div>
+          <label class="compare-toggle"><input type="checkbox" id="compareToggle"> Show the baseline (B2) side by side</label>
         </div>
+        <div class="system-info" id="systemInfo" aria-live="polite"></div>
       </div>
     </section>
 
     <section class="results-section wrap" id="resultsSection" hidden>
       <div class="consistency" id="consistency" hidden></div>
       <div class="results-grid">
-        <div class="results-columns" id="resultsColumns"></div>
+        <div>
+          <div class="read-guide" id="readGuide">
+            <b>How to read a result:</b> the title and passage are from Wikipedia; <span class="hit">highlighted</span> words matched your query (directly or through their sound key). The coloured bar splits the score into its parts:
+            <span><span class="swatch" style="background:var(--series-1)"></span>exact-word BM25</span>
+            <span><span class="swatch" style="background:var(--series-2)"></span>Dhvani (sound) zone</span>
+            <span><span class="swatch" style="background:var(--series-3)"></span>title + proximity</span>
+          </div>
+          <div class="results-columns" id="resultsColumns"></div>
+        </div>
         <aside class="trace" id="trace" aria-label="How this query was processed"></aside>
       </div>
     </section>
 
+    <!-- 3. How it works -->
     <section class="pipeline-section" id="pipeline">
       <div class="wrap">
-        <p class="kicker">How a query travels</p>
-        <h2>Seven stations, <em>one line.</em></h2>
+        <div class="section-head">
+          <p class="kicker">Step 2 · How it works</p>
+          <h2>Seven stations, one line</h2>
+          <p class="section-note">Every query takes this path. The file under each station is where that step lives in the code, so you can open it during the demo.</p>
+        </div>
         <ol class="line" id="line"></ol>
       </div>
     </section>
 
+    <!-- 4. Evidence -->
     <section class="evidence-section" id="evidence">
       <div class="wrap">
-        <p class="kicker">Evidence</p>
-        <h2>Measured, <em>not claimed.</em></h2>
-        <p class="section-note" id="evidenceNote">Every figure below is read from the <code>results/</code> folder: 350 MIRACL-Hindi dev queries, each in three forms. Parameters were tuned on the train split only.</p>
+        <div class="section-head">
+          <p class="kicker">Step 3 · Evidence</p>
+          <h2>Measured, not claimed</h2>
+          <p class="section-note" id="evidenceNote">Every number below is read live from the <code>results/</code> folder: 350 MIRACL-Hindi test queries (dev split), each asked in three forms: Devanagari, standard Roman and casual Roman. All tuning used the separate train split only.</p>
+        </div>
         <div class="tiles" id="tiles"></div>
 
         <div class="figure-block">
           <div class="figure-head">
-            <h3>nDCG@10 by system and query script</h3>
+            <h3>1 · Search quality (nDCG@10) for every system and script</h3>
             <button type="button" class="link-button" data-table="chartSystemsTable">Show table</button>
           </div>
+          <p class="figure-note"><b>How to read:</b> one group of three bars per system. Blue = question in Devanagari, orange = standard Roman, green = casual Roman. Higher is better (1.0 = perfect ranking). A script-invariant system has three bars of the same height.</p>
           <div class="legend" id="systemsLegend"></div>
           <div class="chart" id="chartSystems"></div>
+          <p class="takeaway" id="takeawaySystems"></p>
           <div class="table-wrap" id="chartSystemsTable" hidden></div>
         </div>
 
         <div class="figure-block">
           <div class="figure-head">
-            <h3>Quality vs neural compute</h3>
+            <h3>2 · Quality vs neural compute (the gate)</h3>
             <button type="button" class="link-button" data-table="chartBudgetTable">Show table</button>
           </div>
-          <p class="figure-note">Share of queries that run the neural stage, and the nDCG@10 that buys. The learned gate is compared with a random gate at the same budget.</p>
+          <p class="figure-note"><b>How to read:</b> left to right, more queries run the expensive neural stage. Blue = our learned gate picks which queries; orange = a random gate with the same budget. The dot is the threshold chosen on the train split.</p>
           <div class="legend" id="budgetLegend"></div>
           <div class="chart" id="chartBudget"></div>
+          <p class="takeaway" id="takeawayBudget"></p>
           <div class="table-wrap" id="chartBudgetTable" hidden></div>
         </div>
 
         <div class="figure-block">
-          <div class="figure-head"><h3>Which Dhvani rules matter</h3></div>
-          <p class="figure-note">Each row switches one rule off and rebuilds the Dhvani zone. Words per key measures how much a variant merges.</p>
+          <div class="figure-head"><h3>3 · Which Dhvani rules matter (ablation)</h3></div>
+          <p class="figure-note"><b>How to read:</b> each row switches one rule of the sound key off and rebuilds the Dhvani zone. If Roman nDCG drops a lot, that rule matters. "Words per key" shows how many different words share one key (more = more merging).</p>
           <div class="table-wrap" id="ablationTable"></div>
+          <p class="takeaway" id="takeawayAblation"></p>
         </div>
 
         <div class="figure-block">
-          <div class="figure-head"><h3>Efficiency structures</h3></div>
+          <div class="figure-head"><h3>4 · Speed per system</h3></div>
+          <p class="figure-note"><b>How to read:</b> median and 95th-percentile time per query on a laptop CPU (no GPU). Sparse systems answer in milliseconds; neural ones cost more, which is why the gate exists.</p>
           <div class="table-wrap" id="efficiencyTable"></div>
+          <p class="takeaway" id="takeawayEfficiency"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Human query set -->
+    <section class="human-section" id="human">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="kicker">Step 4 · Real people, real spellings</p>
+          <h2>The human query set</h2>
+          <p class="section-note">Three of us typed the same 60 test questions in Roman letters, on our own, without any transliteration tool. Each of us also wrote code-mixed and English versions of 20 of them. This checks whether the system works on how people really type, not only on our generated variants.</p>
+        </div>
+        <div class="tiles" id="humanTiles"></div>
+
+        <div class="figure-block">
+          <div class="figure-head"><h3>5 · Same word, three people</h3></div>
+          <p class="figure-note"><b>How to read:</b> each row is one word from a question, as each annotator typed it, with its Dhvani key. ✓ = all three keys are the same, so the engine treats the spellings as one word.</p>
+          <div class="table-wrap" id="wordExamples"></div>
+        </div>
+
+        <div class="figure-block">
+          <div class="figure-head"><h3>6 · Search quality on the human queries (nDCG@10)</h3></div>
+          <p class="figure-note"><b>How to read:</b> "Roman A1–A3" are the three annotators' own romanisations. Green marks the best system in each column.</p>
+          <div class="table-wrap" id="humanTable"></div>
+          <p class="takeaway" id="takeawayHuman"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. Glossary -->
+    <section class="glossary-section" id="glossary">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="kicker">Words used on this page</p>
+          <h2>Glossary</h2>
+        </div>
+        <div class="glossary">
+          <div class="term"><h3>Dhvani key</h3><p>A sound code for a word. Consonant sounds are kept, vowels and aspiration are dropped, so <i>mausam</i>, <i>mosam</i> and <span lang="hi">मौसम</span> all become <code>MSM</code>.</p></div>
+          <div class="term"><h3>Zone</h3><p>A separate part of the index. LipiSetu has a surface zone (exact words), a title zone and a Dhvani zone (sound keys). Each zone is scored and the scores are added with weights.</p></div>
+          <div class="term"><h3>df and idf</h3><p>df = how many passages contain a term. idf = log of (N / df), so rare terms count more than common ones.</p></div>
+          <div class="term"><h3>Pooled df</h3><p>One word can have many spellings, and each spelling alone looks rare. Pooled df gives every spelling the df of its whole sound class, so the idf is not inflated.</p></div>
+          <div class="term"><h3>BM25</h3><p>The ranking formula: rewards a term appearing in a passage, with diminishing returns for repeats, and normalises for passage length.</p></div>
+          <div class="term"><h3>Proximity</h3><p>Passages where the query words appear close together rank higher. We use the smallest window that contains all query words.</p></div>
+          <div class="term"><h3>Postings</h3><p>For each term, the list of passages that contain it, with how often (tf) and at which word positions.</p></div>
+          <div class="term"><h3>nDCG@10</h3><p>The main quality score: 1.0 means the relevant passages are at the very top of the first 10 results, 0 means none were found.</p></div>
+          <div class="term"><h3>Script Gap</h3><p>nDCG@10 for Devanagari questions minus nDCG@10 for the same questions in Roman. 0 = the script does not matter.</p></div>
+          <div class="term"><h3>RBO / CSC@10</h3><p>How similar two ranked lists are, giving more weight to the top. 1.0 = identical top 10 for both scripts.</p></div>
+          <div class="term"><h3>Gate</h3><p>A small logistic-regression model that reads signals from the fast search and decides whether the slow neural stage is worth running.</p></div>
+          <div class="term"><h3>Distillation (SCD)</h3><p>We trained a small query encoder so that a Roman question lands at the same point as its Devanagari version. Then we shrank it from 448 MB to 37 MB.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. Team -->
+    <section class="team-section" id="team">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="kicker">Who did what</p>
+          <h2>Team</h2>
+        </div>
+        <div class="team">
+          <div class="member">
+            <p class="member-name">Devansh Pandey</p>
+            <p class="member-roll">2310110461</p>
+            <p>Idea and design; the IR engine; Dhvani key and pooled df; dense retrieval and distillation; learning to rank; the gate; evaluation; this demo; one annotator.</p>
+          </div>
+          <div class="member">
+            <p class="member-name">Anamika Pal</p>
+            <p class="member-roll">2310110037</p>
+            <p>Annotated the human query set; analysed how differently three people romanise the same questions (annotator agreement).</p>
+          </div>
+          <div class="member">
+            <p class="member-name">Abhinav Bachchas</p>
+            <p class="member-roll">2310110383</p>
+            <p>Annotated the human query set; reviewed the final results and plots; proofread the report; shows the live limitation.</p>
+          </div>
         </div>
       </div>
     </section>
@@ -117,12 +241,12 @@
 
   <footer class="footer">
     <div class="wrap footer-inner">
-      <p>Built by Devansh Pandey for the CSD358 IR Hackathon.</p>
+      <p>LipiSetu · CSD358 IR Hackathon, Track T5.</p>
       <p class="muted">Data: MIRACL Hindi (Apache-2.0), passages from Wikipedia (CC BY-SA). Encoder: multilingual-e5-small (MIT).</p>
     </div>
   </footer>
 
   <div class="tooltip" id="tooltip" role="tooltip" hidden></div>
-  <script src="/static/app.js"></script>
+  <script src="/static/app.js?v=3"></script>
 </body>
 </html>
