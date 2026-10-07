@@ -1,0 +1,12 @@
+feature,weight
+bm25_all,-0.0689
+bm25_dhvani,0.8955
+bm25_title,-0.1845
+proximity,0.167
+tfidf,0.2795
+dense,1.352
+sparse_rr,0.619
+dense_rr,0.3954
+lead_passage,0.0197
+log_length,0.1142
+roman_query,-0.2077

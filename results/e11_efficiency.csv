@@ -1,0 +1,9 @@
+experiment,variant,median_ms,ndcg@10,comparisons,docs_scored,overlap@100_with_exact
+top-K selection,heap over scored docs (mine),4.564,,,,
+top-K selection,full sort of all N scores,0.687,,,,
+"champion lists (S1, r=200)",full postings,5.748,0.5045,,,
+"champion lists (S1, r=200)",champion lists,1.17,0.3739,,,
+AND merge (pairs of dev query terms),plain merge,,,4606,,
+AND merge (pairs of dev query terms),skip pointers (sqrt L),,,2354,,
+dense search (D0),exact (all N vectors),10.291,0.2013,,110855,
+dense search (D0),"cluster pruning (sqrt N leaders, 8 clusters)",6.396,0.1327,,5491,0.5048
