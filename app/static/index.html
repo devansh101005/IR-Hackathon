@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LipiSetu · Script-invariant Hindi search</title>
+  <meta name="description" content="One question, every script. A Hindi search engine that returns the same passages for Devanagari, Roman and code-mixed queries.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Devanagari:wght@400;500;600&family=Tiro+Devanagari+Hindi&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="wordmark" href="#top" aria-label="LipiSetu home">
+        <span class="wordmark-deva" lang="hi">लिपिसेतु</span>
+        <span class="wordmark-latin">LipiSetu</span>
+      </a>
+      <nav class="nav" aria-label="Sections">
+        <a href="#search">Search</a>
+        <a href="#pipeline">Pipeline</a>
+        <a href="#evidence">Evidence</a>
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode">
+          <span class="theme-dot"></span><span id="themeLabel">Dark</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero wrap">
+      <p class="kicker">CSD358 · Track T5 · Multilingual and Indic search</p>
+      <h1>One question.<br><em>Every script.</em></h1>
+      <p class="lede">Most Hindi is typed in Roman letters, spelled a different way by every person. Most Hindi text is written in Devanagari. LipiSetu bridges the two with classic IR, so <span class="mono-inline">kal ka mausam</span> and <span lang="hi">कल का मौसम</span> find the same passages.</p>
+
+      <figure class="bridge" aria-label="Different spellings mapping to one Dhvani key">
+        <div class="bridge-words" id="bridgeWords"></div>
+        <svg class="bridge-lines" id="bridgeLines" viewBox="0 0 600 64" preserveAspectRatio="none" aria-hidden="true"></svg>
+        <div class="bridge-key"><span class="bridge-key-label">Dhvani key</span><span class="bridge-key-value" id="bridgeKey">···</span></div>
+        <figcaption>Every spelling of a word collapses to one phonetic key, indexed as its own zone. Keys are computed live by <code>text/dhvani.py</code>.</figcaption>
+      </figure>
+    </section>
+
+    <section class="search-section" id="search">
+      <div class="wrap">
+        <form class="search-form" id="searchForm" autocomplete="off">
+          <label class="visually-hidden" for="query">Search query</label>
+          <input id="query" name="q" type="search" placeholder="Type in any script — kal ka mausam, भारत का संविधान, congress party ka leader" spellcheck="false">
+          <button type="submit" class="search-button">Search</button>
+        </form>
+        <div class="examples" id="examples" aria-label="Example queries"></div>
+        <div class="controls">
+          <div class="segmented" id="systemPicker" role="radiogroup" aria-label="Ranking system"></div>
+          <label class="compare-toggle"><input type="checkbox" id="compareToggle"> Compare with the baseline</label>
+        </div>
+      </div>
+    </section>
+
+    <section class="results-section wrap" id="resultsSection" hidden>
+      <div class="consistency" id="consistency" hidden></div>
+      <div class="results-grid">
+        <div class="results-columns" id="resultsColumns"></div>
+        <aside class="trace" id="trace" aria-label="How this query was processed"></aside>
+      </div>
+    </section>
+
+    <section class="pipeline-section" id="pipeline">
+      <div class="wrap">
+        <p class="kicker">How a query travels</p>
+        <h2>Seven stations, <em>one line.</em></h2>
+        <ol class="line" id="line"></ol>
+      </div>
+    </section>
+
+    <section class="evidence-section" id="evidence">
+      <div class="wrap">
+        <p class="kicker">Evidence</p>
+        <h2>Measured, <em>not claimed.</em></h2>
+        <p class="section-note" id="evidenceNote">Every figure below is read from the <code>results/</code> folder: 350 MIRACL-Hindi dev queries, each in three forms. Parameters were tuned on the train split only.</p>
+        <div class="tiles" id="tiles"></div>
+
+        <div class="figure-block">
+          <div class="figure-head">
+            <h3>nDCG@10 by system and query script</h3>
+            <button type="button" class="link-button" data-table="chartSystemsTable">Show table</button>
+          </div>
+          <div class="legend" id="systemsLegend"></div>
+          <div class="chart" id="chartSystems"></div>
+          <div class="table-wrap" id="chartSystemsTable" hidden></div>
+        </div>
+
+        <div class="figure-block">
+          <div class="figure-head">
+            <h3>Quality vs neural compute</h3>
+            <button type="button" class="link-button" data-table="chartBudgetTable">Show table</button>
+          </div>
+          <p class="figure-note">Share of queries that run the neural stage, and the nDCG@10 that buys. The learned gate is compared with a random gate at the same budget.</p>
+          <div class="legend" id="budgetLegend"></div>
+          <div class="chart" id="chartBudget"></div>
+          <div class="table-wrap" id="chartBudgetTable" hidden></div>
+        </div>
+
+        <div class="figure-block">
+          <div class="figure-head"><h3>Which Dhvani rules matter</h3></div>
+          <p class="figure-note">Each row switches one rule off and rebuilds the Dhvani zone. Words per key measures how much a variant merges.</p>
+          <div class="table-wrap" id="ablationTable"></div>
+        </div>
+
+        <div class="figure-block">
+          <div class="figure-head"><h3>Efficiency structures</h3></div>
+          <div class="table-wrap" id="efficiencyTable"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <p>Built by Devansh Pandey for the CSD358 IR Hackathon.</p>
+      <p class="muted">Data: MIRACL Hindi (Apache-2.0), passages from Wikipedia (CC BY-SA). Encoder: multilingual-e5-small (MIT).</p>
+    </div>
+  </footer>
+
+  <div class="tooltip" id="tooltip" role="tooltip" hidden></div>
+  <script src="/static/app.js"></script>
+</body>
+</html>
