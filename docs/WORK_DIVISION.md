@@ -1,17 +1,17 @@
 # Work Division
 
-The PDF asks for a short, **truthful** note on who worked on what (for information only, no marks). The video also needs **each member to explain the component they own**, so every member must really own and understand one part. **Update this file at the end so it reflects what actually happened.**
+The PDF asks for a short note on who worked on what (for information only, no marks). The video also needs **every member to explain the component they own**. So each teammate owns one small, real part that they actually do and can explain. I own and build everything else.
 
 ## Plan
-| Member | Owns (real work) | Explains in the video |
+| Member | Owns | Explains in the video |
 |---|---|---|
-| **Devansh Pandey** | Architecture; text pipeline (normaliser, tokenizer, stemmer); inverted index and zones; BM25 / tf-idf / Boolean / phrase / top-K; Dhvani key and pooled df; dense encoder, RRF and gated cascade; evaluation harness; README | Pipeline walkthrough with `--explain`: postings, idf, Dhvani keys, zone scores, gate |
-| **Teammate A** | Human query set: annotating 60 queries (romanised + 20 code-mixed + 20 English); checking all three sheets; the annotator-variation analysis (E10: edit distance, Jaccard); reviewing the synthetic romaniser's output against real spellings | Why the problem is real: how differently three people romanise the same query, and the Script Gap on human queries |
-| **Teammate B** | Human query annotation (same as A); running `scripts/run_all_eval.py`; making plots with `scripts/make_plots.py`; writing report §5 (Evaluation) and §6 (Limitations); proofreading the whole report | Evaluation results: baseline vs. ours, the budget curve, one limitation |
+| **Devansh Pandey** | The idea and system design; the whole IR engine (normalisation, tokenizer, stemmer, inverted index, zones, skip pointers, Boolean/phrase, tf-idf, BM25, proximity, top-K, champion lists); the **Dhvani key** and pooled df; dense retrieval with **script-consistency distillation**, vocabulary pruning, int8 ONNX and cluster pruning; **learning-to-rank**; the **gated cascade**; the evaluation framework and novel metrics (Script Gap, CSC, worst-script nDCG); command-line tool and demo; README; most of the report | The problem, the full pipeline live with `--explain`, Dhvani, distillation, the cascade and the main results (about 5 minutes) |
+| **Anamika Pal** (2310110037) | Annotating the human query set (60 romanised + 20 code-mixed + 20 English); running the annotator-variation analysis script and writing up what it shows | How differently three people romanise the same query (about 1 minute) |
+| **Abhinav Bachchas** (2310110383) | Annotating the human query set (same as A); running the final evaluation script and making the plots; proofreading the report | One results plot and one limitation, shown live (about 1 minute) |
 
-## What actually happened (fill in at the end)
+## What actually happened (filled in at the end, must be accurate)
 | Member | Contributions |
 |---|---|
 | Devansh Pandey | |
-| Teammate A | |
-| Teammate B | |
+| Anamika Pal | |
+| Abhinav Bachchas | |

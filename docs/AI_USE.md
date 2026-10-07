@@ -1,11 +1,6 @@
 # AI-Use Declaration
 
-The PDF allows AI tools (including coding agents such as Claude Code) without penalty, **as long as they are declared**. This log is copied into the report's AI-use declaration. **Add a row every time AI is used.**
+The assignment allows AI tools, including coding agents that write most of the code, with **no deduction**, as long as their use is declared. There's no fixed format. This is my declaration for the report.
 
-## Summary (for the report)
-_To be written at the end, e.g.: "We used Claude Code (Anthropic) to draft project-planning documents, generate and refactor code under our direction, and write tests. All design decisions, the human query annotations and the final review of code and numbers were done by the team. Every reported number was produced by scripts in the repo."_
-
-## Log
-| Date | Tool | What it was used for | Files affected | What we checked or changed by hand |
-|---|---|---|---|---|
-| 2026-10-06 | Claude Code | Read the assignment PDF; drafted the project plan, CLAUDE.md, README skeleton and docs/ (planning only, no code) | `PLAN.md`, `CLAUDE.md`, `README.md`, `docs/*.md`, `.gitignore` | Devansh reviewed the plan and chose the track and scope |
+## Declaration (copy into the report; adjust at the end so it stays accurate)
+I used **Claude Code** (an AI coding assistant by Anthropic) in this project to help brainstorm and plan the project, write and refactor code, write tests, and draft documentation. I chose the track and the final idea, directed the work, reviewed the code, and checked the results. My team wrote the human query annotations without AI tools. Every number in the report and video was produced by the scripts in this repository on the real data.

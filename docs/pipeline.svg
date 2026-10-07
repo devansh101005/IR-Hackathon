@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 560" width="1200" height="560" font-family="Inter, 'Helvetica Neue', Arial, sans-serif">
+  <title>LipiSetu pipeline</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#4a4844"/>
+    </marker>
+    <marker id="arrowAccent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#cb6843"/>
+    </marker>
+    <style>
+      .box { fill: #ffffff; stroke: #cfc9c0; stroke-width: 1.2; }
+      .box-accent { fill: #f4e7df; stroke: #cb6843; stroke-width: 1.4; }
+      .box-neural { fill: #eef4fc; stroke: #2a78d6; stroke-width: 1.2; }
+      .t { font-size: 13px; fill: #1a1a1a; font-weight: 600; }
+      .s { font-size: 11px; fill: #4a4844; }
+      .f { font-size: 10px; fill: #6b6b6b; font-family: 'JetBrains Mono', Menlo, monospace; }
+      .lane { font-size: 11px; fill: #a25336; font-family: 'JetBrains Mono', Menlo, monospace; letter-spacing: 1px; }
+      .edge { stroke: #4a4844; stroke-width: 1.3; fill: none; marker-end: url(#arrow); }
+      .edge-accent { stroke: #cb6843; stroke-width: 1.5; fill: none; marker-end: url(#arrowAccent); }
+      .edge-dash { stroke: #6b6b6b; stroke-width: 1.1; fill: none; stroke-dasharray: 4 4; marker-end: url(#arrow); }
+      .lbl { font-size: 11px; fill: #4a4844; font-family: 'JetBrains Mono', Menlo, monospace; }
+    </style>
+  </defs>
+  <rect width="1200" height="560" fill="#fbfaf8"/>
+
+  <!-- OFFLINE LANE -->
+  <text class="lane" x="24" y="30">OFFLINE · INDEX TIME</text>
+  <line x1="24" y1="40" x2="1176" y2="40" stroke="#e5e2dd"/>
+
+  <rect class="box" x="24" y="60" width="170" height="66" rx="6"/>
+  <text class="t" x="36" y="84">MIRACL-hi passages</text>
+  <text class="s" x="36" y="102">110,855 passages</text>
+  <text class="f" x="36" y="118">build_subsample.py</text>
+
+  <rect class="box" x="234" y="60" width="190" height="66" rx="6"/>
+  <text class="t" x="246" y="84">Tokenise · normalise · stem</text>
+  <text class="s" x="246" y="102">NFC, nukta, nasals, stop words</text>
+  <text class="f" x="246" y="118">text/normalize.py · stemmer.py</text>
+
+  <rect class="box-accent" x="464" y="60" width="150" height="66" rx="6"/>
+  <text class="t" x="476" y="84">Dhvani key</text>
+  <text class="s" x="476" y="102">मौसम / mausam → MSM</text>
+  <text class="f" x="476" y="118">text/dhvani.py</text>
+
+  <rect class="box" x="654" y="52" width="260" height="82" rx="6"/>
+  <text class="t" x="666" y="76">Positional inverted index</text>
+  <text class="s" x="666" y="94">zones: surface (all) · title · Dhvani</text>
+  <text class="s" x="666" y="110">df, doc lengths, lnc norms, champion lists</text>
+  <text class="f" x="666" y="126">index/inverted_index.py</text>
+
+  <rect class="box-neural" x="654" y="150" width="260" height="58" rx="6"/>
+  <text class="t" x="666" y="173">Passage vectors (e5-small, int8)</text>
+  <text class="f" x="666" y="194">encode_corpus.py · cluster_pruning.py</text>
+
+  <path class="edge" d="M194 93 H232"/>
+  <path class="edge" d="M424 93 H462"/>
+  <path class="edge" d="M614 93 H652"/>
+  <path class="edge" d="M110 126 V179 H652"/>
+
+  <!-- ONLINE LANE -->
+  <text class="lane" x="24" y="258">ONLINE · QUERY TIME</text>
+  <line x1="24" y1="268" x2="1176" y2="268" stroke="#e5e2dd"/>
+
+  <rect class="box" x="24" y="292" width="150" height="66" rx="6"/>
+  <text class="t" x="36" y="316">Query, any script</text>
+  <text class="s" x="36" y="334">kal ka mausam · कल का…</text>
+  <text class="f" x="36" y="350">query.py</text>
+
+  <rect class="box" x="208" y="292" width="170" height="66" rx="6"/>
+  <text class="t" x="220" y="316">Same text pipeline</text>
+  <text class="s" x="220" y="334">script detect · stem · key</text>
+  <text class="f" x="220" y="350">text/analyzer.py</text>
+
+  <rect class="box-accent" x="412" y="284" width="210" height="82" rx="6"/>
+  <text class="t" x="424" y="308">BM25 per zone</text>
+  <text class="s" x="424" y="326">+ pooled df across spellings</text>
+  <text class="s" x="424" y="342">+ proximity on top 100</text>
+  <text class="f" x="424" y="358">retrieval/bm25.py · proximity.py</text>
+
+  <rect class="box-accent" x="656" y="292" width="170" height="66" rx="6"/>
+  <text class="t" x="668" y="316">Gate</text>
+  <text class="s" x="668" y="334">P(neural helps | IR signals)</text>
+  <text class="f" x="668" y="350">cascade/gate.py</text>
+
+  <rect class="box" x="1010" y="292" width="166" height="66" rx="6"/>
+  <text class="t" x="1022" y="316">Ranked passages</text>
+  <text class="s" x="1022" y="334">+ --explain trace</text>
+  <text class="f" x="1022" y="350">cli.py · app/server.py</text>
+
+  <rect class="box-neural" x="656" y="410" width="170" height="66" rx="6"/>
+  <text class="t" x="668" y="434">SCD query encoder</text>
+  <text class="s" x="668" y="452">distilled, pruned, int8</text>
+  <text class="f" x="668" y="468">dense/scd.py</text>
+
+  <rect class="box-neural" x="860" y="410" width="150" height="66" rx="6"/>
+  <text class="t" x="872" y="434">Dense top 100</text>
+  <text class="s" x="872" y="452">cosine over vectors</text>
+  <text class="f" x="872" y="468">dense/retriever.py</text>
+
+  <rect class="box" x="1040" y="410" width="136" height="66" rx="6"/>
+  <text class="t" x="1052" y="434">RRF or LTR</text>
+  <text class="s" x="1052" y="452">fuse sparse + dense</text>
+  <text class="f" x="1052" y="468">rrf.py · ltr.py</text>
+
+  <path class="edge" d="M174 325 H206"/>
+  <path class="edge" d="M378 325 H410"/>
+  <path class="edge" d="M622 325 H654"/>
+  <path class="edge-accent" d="M826 325 H1008"/>
+  <text class="lbl" x="868" y="316">no: confident</text>
+  <path class="edge" d="M741 358 V408"/>
+  <text class="lbl" x="750" y="390">yes</text>
+  <path class="edge" d="M826 443 H858"/>
+  <path class="edge" d="M1010 443 H1038"/>
+  <path class="edge" d="M1108 410 V360"/>
+
+  <!-- index used at query time -->
+  <path class="edge-dash" d="M654 116 C 560 120, 517 190, 517 282"/>
+  <text class="lbl" x="528" y="236">postings lookups</text>
+  <path class="edge-dash" d="M914 179 C 1000 179, 935 330, 935 408"/>
+  <text class="lbl" x="952" y="250">vectors</text>
+
+  <text class="s" x="24" y="530">Orange = my IR contributions (Dhvani zone, pooled df, proximity, gate). Blue = neural components. Every box names the file that implements it.</text>
+</svg>
