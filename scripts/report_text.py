@@ -66,7 +66,8 @@ def title_block(n):
         "<h1>LipiSetu: Script-Invariant Hindi Search</h1>"
         '<div class="meta"><b>CSD358 IR Hackathon · Track T5: Multilingual and Indic-language search</b><br>'
         "Team: Devansh Pandey (2310110461), Anamika Pal (2310110037), Abhinav Bachchas (2310110383) · "
-        "Code: <span class=\"mono\">github.com/devansh101005/IR-Hackathon</span> · Demo video: <i>[unlisted link]</i></div>"
+        "Code: <a href=\"https://github.com/devansh101005/IR-Hackathon\">github.com/devansh101005/IR-Hackathon</a> · "
+        "Demo video: <a href=\"https://drive.google.com/file/d/1TqHq50ZBkyzUqQHaT9QEZ2kipsKy6S4D/view?usp=sharing\">Google Drive (7:52)</a></div>"
         '<div class="abstract">Most Hindi users type Hindi in Roman letters, each with their own spelling, while most '
         "Hindi text is written in Devanagari. A standard search engine therefore serves them far worse: on 350 judged "
         "MIRACL-Hindi queries, BM25 reaches nDCG@10 " + n["b1_f1"] + " for Devanagari queries but only " + n["b1_f2"] +

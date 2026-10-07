@@ -2,6 +2,8 @@
 
 **CSD358 IR Hackathon · Track T5: Multilingual and Indic-language search**
 
+🎬 **Demo video (7:52):** https://drive.google.com/file/d/1TqHq50ZBkyzUqQHaT9QEZ2kipsKy6S4D/view?usp=sharing · 📄 **Report:** [`docs/report/LipiSetu_report.pdf`](docs/report/LipiSetu_report.pdf)
+
 Someone who types *"kal ka mausam"* should get the same results as someone who types *"कल का मौसम"*. On 350 judged MIRACL-Hindi queries, standard BM25 drops from nDCG@10 **0.533** (Devanagari) to **0.004** (same questions in Roman script), and the obvious fix, transliterating the query, only reaches **0.113**. I call this loss the **Script Gap**.
 
 LipiSetu closes most of it with classic IR, all written from scratch:
