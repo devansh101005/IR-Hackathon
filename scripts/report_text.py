@@ -482,11 +482,11 @@ def section_work_division():
 def section_ai():
     return (
         "<h2>AI-Use Declaration</h2>"
-        "<p>We used Claude Code (an AI coding assistant by Anthropic) to help brainstorm and plan the project, write "
-        "and refactor code, write tests, run the experiments and draft documentation. Devansh chose the track and the "
-        "final idea, directed the work, reviewed the code and checked the results. The human query annotations were "
-        "written by the three of us without AI tools. Every number in this report was produced by the scripts in "
-        "the repository on the real data.</p>"
+        "<p>We used Claude Code (an AI coding agent by Anthropic) to write code, tests and documentation and to run "
+        "the experiments, under Devansh's direction. Devansh chose the track and the idea, designed the system, "
+        "reviewed the code and checked every result. The human query annotations were written by the three of us "
+        "without AI tools. Every number in this report was produced by the scripts in the repository on the real "
+        "data.</p>"
     )
 
 
