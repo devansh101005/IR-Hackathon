@@ -1,10 +1,10 @@
 {
   "queries": 1050,
   "always_sparse_ndcg@10": 0.5073,
-  "always_neural_ndcg@10": 0.4962,
+  "always_neural_ndcg@10": 0.4963,
   "gate_threshold_from_train": 0.47000000000000003,
-  "gate_neural_share": 0.3524,
-  "gate_ndcg@10": 0.5377,
-  "oracle_ndcg@10": 0.5986,
-  "oracle_neural_share": 0.3238
+  "gate_neural_share": 0.3629,
+  "gate_ndcg@10": 0.5381,
+  "oracle_ndcg@10": 0.598,
+  "oracle_neural_share": 0.3143
 }

@@ -1,0 +1,8 @@
+{
+  "queries_with_three_romanisations": 60,
+  "words_compared": 500,
+  "same_spelling_all_three": 0.778,
+  "same_dhvani_key_all_three": 0.914,
+  "mean_bigram_jaccard": 0.8983,
+  "mean_normalised_edit_distance": 0.0591
+}

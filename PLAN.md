@@ -4,7 +4,7 @@
 > **Track:** T5, Multilingual and Indic-language search
 > **One line:** If someone types *"kal ka mausam"* in Roman letters, they should get the same results as someone who types *"कल का मौसम"*. Today they don't. I **measure** that gap, **close** it with classic IR, and **run neural models only when the IR signals say they are needed**.
 
-**Status: built.** Everything in phases P1–P9 is implemented and evaluated; see `README.md` for the results and `docs/report/LipiSetu_report.pdf` for the report. The only open item is the human query set, which needs the three annotators.
+**Status: built.** Everything in phases P1–P9 is implemented and evaluated; see `README.md` for the results and `docs/report/LipiSetu_report.pdf` for the report. The human query set (3 annotators × 60 queries) is in and evaluated. Remaining before submission: the video, its link in the report, the "what actually happened" work-division table, and the fresh-clone check (§9–10).
 
 This is my master plan for the hackathon. Every section maps to marks in the rubric (`Hackathon file/CSD358 IR Mid-term Assignment 2026.pdf`).
 

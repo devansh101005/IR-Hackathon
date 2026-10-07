@@ -65,7 +65,7 @@ def title_block(n):
     return (
         "<h1>LipiSetu: Script-Invariant Hindi Search</h1>"
         '<div class="meta"><b>CSD358 IR Hackathon · Track T5: Multilingual and Indic-language search</b><br>'
-        "Team: Devansh Pandey (<i>[roll no.]</i>), Anamika Pal (2310110037), Abhinav Bachchas (2310110383) · "
+        "Team: Devansh Pandey (2310110461), Anamika Pal (2310110037), Abhinav Bachchas (2310110383) · "
         "Code: <span class=\"mono\">github.com/devansh101005/IR-Hackathon</span> · Demo video: <i>[unlisted link]</i></div>"
         '<div class="abstract">Most Hindi users type Hindi in Roman letters, each with their own spelling, while most '
         "Hindi text is written in Devanagari. A standard search engine therefore serves them far worse: on 350 judged "
@@ -256,19 +256,34 @@ def section_evaluation(n, t, point, human):
     html += "<h3>Table 4. Pooled df on a mixed-script corpus (30% of passages romanised, synthetic)</h3>"
     html += '<div class="two"><div>' + t["mixed"] + "</div><div>" + t["idf"] + "</div></div>"
     html += "<h3>Table 5. Efficiency structures</h3>" + t["structures"]
-    html += ("<p class=\"small\">Skip pointers halve the comparisons of AND merges. Champion lists are about 5x "
+    html += ("<p class=\"small\">Skip pointers halve the comparisons of AND merges. Champion lists are 5-6x "
              "faster but lose a lot of quality, mostly for Roman queries whose Dhvani postings are long. Cluster "
-             "pruning scores about 5% of the vectors and keeps half of the exact top 100. In pure Python the heap "
-             "top-K is slower than numpy's C sort even though it is asymptotically better.</p>")
+             "pruning scores about 5% of the vectors and keeps half of the exact top 100, but on this laptop it is "
+             "not faster: one numpy dot product over all 110k vectors already takes only a few milliseconds, so "
+             "collecting the followers costs as much as it saves. It should only pay off on a much larger "
+             "collection. In pure Python the heap top-K is slower than numpy's C sort even though it is "
+             "asymptotically better.</p>")
     html += ("<p><b>Significance.</b> Paired randomisation tests (10,000 permutations, nDCG@10, appendix D) give "
              "p &lt; 0.001 for every Roman-query gain listed above (S1 over B1 and S0, S3 over B2, D1 over D0, L1 and "
              "G1 over H1) and for H1 over S3 on Devanagari. On Devanagari queries the sparse systems are not "
              "significantly different from B1/B2 (no loss), and G1 is not significantly different from the "
              "always-hybrid H1, even though it runs the neural stage for only a third of the queries.</p>")
     if human:
-        html += ("<p><b>Human query set.</b> Three annotators romanised the same queries independently. All three "
+        html += ("<p><b>Human query set.</b> Three team members romanised the same 60 dev queries independently "
+                 "(no transliteration tools), and each wrote code-mixed and English versions of 20 of them. All three "
                  "spelled a word identically for " + pct(human.get("same_spelling_all_three", 0)) + " of words, but the "
-                 "Dhvani keys agreed for " + pct(human.get("same_dhvani_key_all_three", 0)) + ".</p>")
+                 "Dhvani keys agreed for " + pct(human.get("same_dhvani_key_all_three", 0)) + ". On the real "
+                 "romanisations BM25 reaches only " + n["hum_b1_r"] + " and transliteration " + n["hum_b2_r"] +
+                 ", while S3 reaches " + n["hum_s3_r"] + " (p ≤ " + n["hum_p_s3_b2"] + " against B2 for every "
+                 "annotator) and learning to rank " + n["hum_l1_r"] + " (p ≤ " + n["hum_p_l1_h1"] + " against H1). "
+                 "So the synthetic results hold for real spelling variation. Code-mixed and English queries are "
+                 "different: a phonetic key cannot link <i>leader</i> to नेता, so S3 drops to " + n["hum_s3_cm"] +
+                 " (code-mixed) and " + n["hum_s3_en"] + " (English), and only the dense stage helps (D1 " +
+                 n["hum_d1_en"] + " on English, L1 " + n["hum_l1_cm"] + " on code-mixed). The gate was trained on "
+                 "Devanagari and romanised queries only, and it under-calls the neural stage here: G1 is below the "
+                 "always-hybrid H1 on code-mixed (" + n["hum_g1_cm"] + " vs " + n["hum_h1_cm"] + ", p = " +
+                 n["hum_p_g1_h1_cm"] + ") and English (" + n["hum_g1_en"] + " vs " + n["hum_h1_en"] + ", p = " +
+                 n["hum_p_g1_h1_en"] + ").</p>" + t["human"])
     return html
 
 
@@ -282,7 +297,10 @@ def section_limitations(n):
         "<li>Dhvani merges some different words: <i>kal</i> (कल, yesterday) and खेल (khel, game) share the key KL, "
         "because aspiration and vowels are dropped. Words whose spoken form drops a vowel (कमला / kamla) get different "
         "keys. Zone weights limit the damage but do not remove it.</li>"
-        "<li>English words inside code-mixed queries are only matched by the dense stage.</li>"
+        "<li>English words inside code-mixed queries are only matched by the dense stage, and the gate never saw "
+        "code-mixed or English queries in training, so it runs the dense stage too rarely for them.</li>"
+        "<li>The human set is small (60 queries), and one annotator (me) designed the Dhvani key, so that "
+        "romanisation is not blind.</li>"
         "<li>Hindi only.</li></ul>"
         "<p><b>Course-project roadmap.</b> (1) Bengali and Telugu from MIRACL with per-language Dhvani tables; "
         "(2) a larger human query set and voice queries; (3) the int8 encoder in the browser with ONNX Runtime Web, so "
@@ -341,7 +359,7 @@ def section_references():
 def section_appendix(t, params):
     return (
         '<h2 class="pb">Appendix</h2>'
-        "<h3>A. Query latency per system (CPU, 4 cores)</h3>" + t["efficiency"]
+        "<h3>A. Query latency per system (laptop CPU, Intel i5-12450H, no GPU)</h3>" + t["efficiency"]
         + '<div class="two"><div><h3>B. Learning-to-rank weights</h3>' + t["ltr"] + "</div>"
         + "<div><h3>C. Gate weights</h3>" + t["gate"] + "</div></div>"
         + "<h3>D. Significance (paired randomisation test, 10,000 permutations, nDCG@10)</h3>" + t["significance"]

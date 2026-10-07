@@ -1,9 +1,9 @@
 feature,weight
-top_score,-0.0377
-score_gap,-0.329
-nqc,0.1062
-dhvani_only,-0.2881
-unmatched,-0.0865
-max_idf,0.1116
-query_length,-0.1746
-roman_query,-0.1923
+top_score,-0.0376
+score_gap,-0.3148
+nqc,0.141
+dhvani_only,-0.4026
+unmatched,-0.09
+max_idf,0.0834
+query_length,-0.1649
+roman_query,-0.0786

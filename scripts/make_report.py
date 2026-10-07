@@ -167,6 +167,54 @@ def significance_table(rows_in):
     return table(["comparison", "form", "nDCG A", "nDCG B", "difference", "p-value", "p < 0.05"], rows, numeric_from=2)
 
 
+HUMAN_FORMS = ["F1", "H-R1", "H-R2", "H-R3", "H-CM", "H-EN"]
+HUMAN_SYSTEMS = ["B1", "B2", "S0", "S3", "D0", "D1", "H1", "L1", "G1"]
+
+
+def human_table(human_main):
+    """nDCG@10 on the 60 human queries: Devanagari, three romanisations, code-mixed, English."""
+    rows = []
+    for s in HUMAN_SYSTEMS:
+        if metric(human_main, s, "F1") is None:
+            continue
+        row = [s, NAMES[s]]
+        for form in HUMAN_FORMS:
+            row.append(f3(metric(human_main, s, form)))
+        rows.append(row)
+    return table(["", "system", "Deva", "Roman A1", "Roman A2", "Roman A3", "code-mixed", "English"],
+                 rows, numeric_from=2, highlight=["S3", "L1"])
+
+
+def p_value(rows_in, set_name, form, system_a, system_b):
+    """p-value of one paired randomisation test from significance.csv ('–' if it was not run)."""
+    for r in rows_in:
+        if r["set"] == set_name and r["form"] == form and r["system_a"] == system_a and r["system_b"] == system_b:
+            return "%.4f" % float(r["p_value"])
+    return "–"
+
+
+def roman_range(human_main, system):
+    """Lowest and highest nDCG@10 over the three human romanisations, e.g. '0.435–0.448'."""
+    values = []
+    for form in ["H-R1", "H-R2", "H-R3"]:
+        value = metric(human_main, system, form)
+        if value is not None:
+            values.append(value)
+    if len(values) == 0:
+        return "–"
+    return "%.3f–%.3f" % (min(values), max(values))
+
+
+def largest_p(rows_in, set_name, forms, system_a, system_b):
+    """The largest p-value over several forms (to say 'p ≤ x for all of them')."""
+    largest = 0.0
+    for form in forms:
+        value = p_value(rows_in, set_name, form, system_a, system_b)
+        if value != "–":
+            largest = max(largest, float(value))
+    return "%.4f" % largest
+
+
 def weights_table(rows_in, title):
     rows = [[r["feature"], "%+.3f" % float(r["weight"])] for r in rows_in]
     return table([title, "weight"], rows)
@@ -191,6 +239,7 @@ def build():
     top_terms = read_csv("e3_top_df_terms.csv")
     length_bias = read_json("e13_length_bias.json")
     mixed_inv = read_csv("e6_mixed_invariance.csv")
+    human_main = read_csv("human_metrics.csv")
 
     b2 = row_for(inv, "system", "B2")
     s1 = row_for(inv, "system", "S1")
@@ -229,6 +278,20 @@ def build():
         "l1_ms": "%.1f" % float(row_for(eff, "system", "L1").get("median_ms", 0)),
         "s3_ms": "%.1f" % float(row_for(eff, "system", "S3").get("median_ms", 0)),
     }
+    # Human query set (60 dev queries): ranges over the three annotators' romanisations
+    roman_forms = ["H-R1", "H-R2", "H-R3"]
+    numbers.update({
+        "hum_b1_r": roman_range(human_main, "B1"), "hum_b2_r": roman_range(human_main, "B2"),
+        "hum_s3_r": roman_range(human_main, "S3"), "hum_l1_r": roman_range(human_main, "L1"),
+        "hum_s3_cm": f3(metric(human_main, "S3", "H-CM")), "hum_s3_en": f3(metric(human_main, "S3", "H-EN")),
+        "hum_d1_en": f3(metric(human_main, "D1", "H-EN")), "hum_l1_cm": f3(metric(human_main, "L1", "H-CM")),
+        "hum_h1_cm": f3(metric(human_main, "H1", "H-CM")), "hum_h1_en": f3(metric(human_main, "H1", "H-EN")),
+        "hum_g1_cm": f3(metric(human_main, "G1", "H-CM")), "hum_g1_en": f3(metric(human_main, "G1", "H-EN")),
+        "hum_p_s3_b2": largest_p(significance, "human", roman_forms, "S3", "B2"),
+        "hum_p_l1_h1": largest_p(significance, "human", roman_forms, "L1", "H1"),
+        "hum_p_g1_h1_cm": p_value(significance, "human", "H-CM", "G1", "H1"),
+        "hum_p_g1_h1_en": p_value(significance, "human", "H-EN", "G1", "H1"),
+    })
     from report_text import report_html
     html = report_html(numbers, {
         "effectiveness": effectiveness_table(main), "invariance": invariance_table(inv),
@@ -236,6 +299,7 @@ def build():
         "idf": idf_table(idf_examples), "structures": eff_structures_table(structures),
         "significance": significance_table(significance), "ltr": weights_table(ltr, "LTR feature"),
         "gate": weights_table(gate_w, "gate feature"),
+        "human": human_table(human_main) if len(human_main) > 0 else "",
     }, corpus, params, scd, point, human, top_terms)
     os.makedirs(REPORT_DIR, exist_ok=True)
     path = os.path.join(REPORT_DIR, "report.html")
