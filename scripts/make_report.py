@@ -261,7 +261,7 @@ def build():
         "l1_f1": f3(metric(main, "L1", "F1")), "l1_f3": f3(metric(main, "L1", "F3")),
         "g1_f1": f3(metric(main, "G1", "F1")), "g1_f3": f3(metric(main, "G1", "F3")),
         "g1_f2": f3(metric(main, "G1", "F2")), "l1_f2": f3(metric(main, "L1", "F2")), "h1_f2": f3(metric(main, "H1", "F2")),
-        "s2_f1": f3(metric(main, "S2", "F1")), "s1_f1": f3(metric(main, "S1", "F1")), "s0_f3": f3(metric(main, "S0", "F3")),
+        "s2_f1": f3(metric(main, "S2", "F1")), "s2_f2": f3(metric(main, "S2", "F2")), "s1_f1": f3(metric(main, "S1", "F1")), "s0_f3": f3(metric(main, "S0", "F3")),
         "s2_gap3": f3(row_for(inv, "system", "S2").get("gap_F3")), "s2_csc": f3(row_for(inv, "system", "S2").get("csc@10")),
         "l1_csc": f3(row_for(inv, "system", "L1").get("csc@10")), "g1_csc": f3(row_for(inv, "system", "G1").get("csc@10")),
         "l1_worst": f3(row_for(inv, "system", "L1").get("worst_ndcg@10")), "b2_worst": f3(b2.get("worst_ndcg@10")),

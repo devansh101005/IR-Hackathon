@@ -3,7 +3,7 @@
 Usage: python scripts/make_plots.py
 Outputs: results/fig_*.png
 Every number in a figure is read from results/ (nothing is typed in by hand).
-Colours: a categorical palette checked for colour-blind safety (blue, orange, aqua).
+Style: matplotlib's default look (default colours, black text); only the resolution is raised for the PDF.
 """
 import csv
 import json
@@ -17,22 +17,17 @@ import matplotlib.pyplot as plt
 
 from lipisetu import config
 
-SERIES = ["#2a78d6", "#eb6834", "#1baf7a"]
-INK = "#1a1a1a"
-MUTED = "#6b6b6b"
-GRID = "#e6e3de"
+SERIES = ["tab:blue", "tab:orange", "tab:green"]
+INK = "black"
+MUTED = "black"
+GRID = "#b0b0b0"
 SYSTEM_ORDER = ["B0", "B1", "B1N", "B2", "V1", "S0", "S1", "S2", "S3", "D0", "D1", "H1", "L1", "G1"]
 FORM_NAMES = {"F1": "Devanagari", "F2": "Standard Roman", "F3": "Casual Roman"}
 
 
 def style():
-    plt.rcParams.update({
-        "font.size": 10, "axes.edgecolor": GRID, "axes.labelcolor": MUTED, "xtick.color": MUTED,
-        "ytick.color": MUTED, "axes.spines.top": False, "axes.spines.right": False,
-        "axes.spines.left": False, "axes.grid": True, "axes.grid.axis": "y", "grid.color": GRID,
-        "grid.linewidth": 0.8, "legend.frameon": False, "figure.dpi": 150, "savefig.bbox": "tight",
-        "axes.titlesize": 11, "axes.titleweight": "bold", "axes.titlecolor": INK, "axes.titlelocation": "left",
-    })
+    # Keep matplotlib's default style; only make the images sharp enough for print
+    plt.rcParams.update({"figure.dpi": 200, "savefig.bbox": "tight", "font.size": 10})
 
 
 def read_csv(name):

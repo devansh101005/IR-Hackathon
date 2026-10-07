@@ -2,7 +2,12 @@
 
 Written as plain HTML strings so it is easy to edit. Keep every claim tied to a number
 that comes from results/ (passed in through `n` and the tables).
+Style: a normal college report (Times New Roman text, Arial headings, plain grid tables).
 """
+
+VIDEO_LINK = "https://drive.google.com/file/d/1TqHq50ZBkyzUqQHaT9QEZ2kipsKy6S4D/view?usp=sharing"
+CODE_LINK = "https://github.com/devansh101005/IR-Hackathon"
+
 
 def pct(value):
     return "%.0f%%" % (100.0 * float(value))
@@ -12,39 +17,64 @@ def figure(path, caption, width="100%"):
     return '<figure><img src="%s" style="width:%s"><figcaption>%s</figcaption></figure>' % (path, width, caption)
 
 
+def caption(text):
+    """Table captions go above the table, like in Word."""
+    return '<p class="tcap">' + text + "</p>"
+
+
+def simple_table(headers, rows):
+    html = "<table><thead><tr>"
+    for h in headers:
+        html += "<th>" + h + "</th>"
+    html += "</tr></thead><tbody>"
+    for row in rows:
+        html += "<tr>"
+        for cell in row:
+            html += "<td>" + cell + "</td>"
+        html += "</tr>"
+    return html + "</tbody></table>"
+
+
 CSS = """
-@page { size: A4; margin: 16mm 15mm 16mm 15mm; }
-body { font-family: 'Inter', 'Noto Sans Devanagari', Arial, sans-serif; font-size: 9.6pt; line-height: 1.42; color: #1a1a1a; }
-h1 { font-family: 'Fraunces', Georgia, serif; font-weight: 500; font-size: 21pt; margin: 0 0 2pt; letter-spacing: -0.01em; }
-h2 { font-size: 12pt; margin: 13pt 0 5pt; padding-bottom: 2pt; border-bottom: 1px solid #1a1a1a; }
-h3 { font-size: 10pt; margin: 9pt 0 3pt; break-after: avoid; page-break-after: avoid; }
-h2 { break-after: avoid; page-break-after: avoid; }
-p { margin: 0 0 5pt; text-align: justify; hyphens: auto; }
-.meta { color: #4a4844; font-size: 9pt; margin-bottom: 8pt; }
-.meta b { color: #1a1a1a; }
-.abstract { border-left: 3px solid #cb6843; padding: 5pt 9pt; background: #fbf6f2; margin: 6pt 0 8pt; }
-code, .mono { font-family: 'JetBrains Mono', Menlo, monospace; font-size: 8.4pt; }
-table { width: 100%; border-collapse: collapse; margin: 4pt 0 7pt; font-size: 8.4pt; page-break-inside: avoid; }
-th { text-align: left; font-weight: 600; border-bottom: 1px solid #1a1a1a; padding: 2.5pt 5pt 2.5pt 0; }
-td { border-bottom: 1px solid #e6e3de; padding: 2.2pt 5pt 2.2pt 0; }
-th.num, td.num { text-align: right; font-variant-numeric: tabular-nums; }
-tr.hl td { font-weight: 600; background: #fbf6f2; }
+@page { size: A4; margin: 17mm 16mm 17mm 16mm; }
+body { font-family: 'Times New Roman', Times, 'Nirmala UI', Mangal, serif; font-size: 10.5pt; line-height: 1.27; color: #000; }
+h1 { font-family: Arial, Helvetica, sans-serif; font-size: 18pt; text-align: center; margin: 0 0 3pt; }
+.subtitle { text-align: center; font-size: 11.5pt; font-style: italic; margin: 0 0 4pt; }
+.course { text-align: center; font-size: 10.5pt; margin: 0 0 8pt; }
+.links { text-align: center; font-size: 10pt; margin: 6pt 0 0; }
+a { color: #1f4e9c; text-decoration: none; }
+h2 { font-family: Arial, Helvetica, sans-serif; font-size: 12.5pt; margin: 11pt 0 4pt; break-after: avoid; page-break-after: avoid; }
+h3 { font-family: Arial, Helvetica, sans-serif; font-size: 10.5pt; margin: 7pt 0 2pt; break-after: avoid; page-break-after: avoid; }
+p { margin: 0 0 5pt; text-align: justify; }
+.abstract-title { font-family: Arial, Helvetica, sans-serif; font-weight: bold; text-align: center; margin: 10pt 0 3pt; }
+.abstract { margin: 0 24pt 6pt; font-size: 10.5pt; text-align: justify; }
+hr { border: none; border-top: 1px solid #000; margin: 8pt 0; }
+code, .mono { font-family: 'Courier New', Courier, monospace; font-size: 9.5pt; }
+table { border-collapse: collapse; margin: 0 auto 7pt; font-size: 9pt; page-break-inside: avoid; }
+th, td { border: 1px solid #000; padding: 1.8pt 4.5pt; vertical-align: top; }
+th { background: #d9d9d9; font-weight: bold; text-align: center; }
+th.num, td.num { text-align: right; }
+tr.hl td { font-weight: bold; }
+table.team { margin: 4pt auto 0; font-size: 10pt; }
+.tcap { text-align: center; font-weight: bold; font-size: 9.5pt; margin: 6pt 0 2pt; break-after: avoid; page-break-after: avoid; }
 figure { margin: 6pt 0 8pt; page-break-inside: avoid; text-align: center; }
 figure img { max-width: 100%; }
-figcaption { font-size: 8.4pt; color: #4a4844; margin-top: 2pt; text-align: left; }
-.two { display: grid; grid-template-columns: 1fr 1fr; gap: 10pt; }
-.formula { font-family: 'JetBrains Mono', Menlo, monospace; font-size: 8.4pt; background: #f6f4f0; padding: 4pt 7pt; margin: 3pt 0 6pt; border-radius: 3px; }
-ul { margin: 2pt 0 6pt 14pt; padding: 0; }
-li { margin-bottom: 2pt; }
-.refs li { font-size: 8.4pt; }
+.two figure img { max-height: 56mm; width: auto !important; }
+figcaption { font-size: 9.5pt; margin-top: 3pt; text-align: center; }
+figcaption b { font-weight: bold; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 12pt; align-items: start; }
+.eq { text-align: center; font-style: italic; margin: 4pt 0 7pt; }
+.eq .no { float: right; font-style: normal; }
+ul, ol { margin: 2pt 0 6pt 18pt; padding: 0; }
+li { margin-bottom: 2pt; text-align: justify; }
+.refs li { font-size: 10pt; }
 .pb { page-break-before: always; }
-.small { font-size: 8.4pt; color: #4a4844; }
+.note { font-size: 10pt; }
 """
 
 
 def report_html(n, t, corpus, params, scd, point, human, top_terms):
     html = '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>LipiSetu report</title>'
-    html += '<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500&family=Inter:wght@400;600&family=JetBrains+Mono&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet">'
     html += "<style>" + CSS + "</style></head><body>"
     html += title_block(n)
     html += section_problem(n, corpus)
@@ -62,275 +92,401 @@ def report_html(n, t, corpus, params, scd, point, human, top_terms):
 
 
 def title_block(n):
+    team = simple_table(["Name", "Roll No.", "Main contribution"], [
+        ["Devansh Pandey", "2310110461", "Design, IR engine, Dhvani key, neural parts, evaluation, demo, report"],
+        ["Anamika Pal", "2310110037", "Human query annotation, annotator-agreement analysis"],
+        ["Abhinav Bachchas", "2310110383", "Human query annotation, results review, report proofreading"],
+    ]).replace("<table>", '<table class="team">')
     return (
         "<h1>LipiSetu: Script-Invariant Hindi Search</h1>"
-        '<div class="meta"><b>CSD358 IR Hackathon · Track T5: Multilingual and Indic-language search</b><br>'
-        "Team: Devansh Pandey (2310110461), Anamika Pal (2310110037), Abhinav Bachchas (2310110383) · "
-        "Code: <a href=\"https://github.com/devansh101005/IR-Hackathon\">github.com/devansh101005/IR-Hackathon</a> · "
-        "Demo video: <a href=\"https://drive.google.com/file/d/1TqHq50ZBkyzUqQHaT9QEZ2kipsKy6S4D/view?usp=sharing\">Google Drive (7:52)</a></div>"
-        '<div class="abstract">Most Hindi users type Hindi in Roman letters, each with their own spelling, while most '
-        "Hindi text is written in Devanagari. A standard search engine therefore serves them far worse: on 350 judged "
-        "MIRACL-Hindi queries, BM25 reaches nDCG@10 " + n["b1_f1"] + " for Devanagari queries but only " + n["b1_f2"] +
-        " for the same questions typed in Roman script, and the obvious fix (transliterating the query) only reaches " +
-        n["b2_f2"] + ". We call this loss the <b>Script Gap</b>. LipiSetu closes most of it with classic IR: a "
-        "cross-script phonetic key (the <b>Dhvani key</b>) indexed as its own zone, <b>pooled document frequency</b> "
-        "across spellings, and query-term proximity, all inside a BM25 engine written from scratch. A distilled, "
-        "int8 neural query encoder is run only when a gate trained on IR signals predicts that it will help.</div>"
+        '<p class="subtitle">One question, every script</p>'
+        '<p class="course">CSD358 Information Retrieval &nbsp;|&nbsp; Mid-term Hackathon 2026 &nbsp;|&nbsp; '
+        "Track T5: Multilingual and Indic-language Search</p>"
+        + team +
+        '<p class="links"><b>Code:</b> <a href="' + CODE_LINK + '">github.com/devansh101005/IR-Hackathon</a>'
+        ' &nbsp;&nbsp; <b>Demo video:</b> <a href="' + VIDEO_LINK + '">Google Drive link (7:52)</a></p>'
+        '<p class="abstract-title">Abstract</p>'
+        '<p class="abstract">Most people type Hindi in Roman letters, and everyone spells it differently '
+        "(<i>mausam, mosam, mousam</i>). Most Hindi text on the web, however, is written in Devanagari (मौसम). "
+        "A normal search engine matches exact words, so these users get much worse results. On 350 judged "
+        "MIRACL-Hindi test queries, BM25 reaches nDCG@10 " + n["b1_f1"] + " for questions typed in Devanagari, "
+        "but only " + n["b1_f2"] + " for the same questions typed in Roman letters, and the obvious fix "
+        "(transliterating the query first) only reaches " + n["b2_f2"] + ". We call this loss the <b>Script Gap</b>. "
+        "LipiSetu closes most of it with classic IR, written from scratch: a sound-based key for every word "
+        "(the <b>Dhvani key</b>) stored as its own index zone, <b>pooled document frequency</b> across spellings, "
+        "and query-term proximity inside BM25. With these, Roman queries reach " + n["s2_f2"] + ". A small "
+        "distilled neural encoder (448 MB → 37 MB) runs only when a gate trained on IR signals predicts it will "
+        "help. A human query set typed by our three team members confirms the results on real spellings.</p>"
+        "<hr>"
     )
 
 
+# ---------------------------------------------------------------- 1. Problem
 def section_problem(n, corpus):
     return (
-        "<h2>1. Problem and track relevance</h2>"
-        "<p><b>User need.</b> On phones, Hindi is mostly typed in Roman script (\"kal ka mausam\"), and the same word is "
-        "spelled in many ways (mausam / mosam / mousam). The content people search (Wikipedia, news, government pages) "
-        "is mostly in Devanagari (\"कल का मौसम\"). An inverted index matches exact terms, so these users silently get "
-        "worse results. The problem is also inside the data itself: " + pct(corpus.get("share_of_docs_with_roman_words", 0)) +
-        " of the MIRACL-Hindi passages we index already contain Roman-script words.</p>"
-        "<p><b>Why it belongs to T5.</b> The track asks for search in an Indian language with code-mixed or "
-        "transliterated queries. Our system touches every IR hook listed for T5: tokenisation and normalisation for "
-        "Devanagari, a Hindi stemmer compared with no stemming, Soundex-style phonetic matching for transliterated "
-        "spellings, the behaviour of stop words and idf on a Hindi corpus, and cross-lingual ranking in a vector space.</p>"
-        "<p><b>Papers referred.</b> Mixed-script IR was studied by Gupta et al. (SIGIR 2014) and in the FIRE 2015 MSIR "
-        "shared task; we use MIRACL (Zhang et al., TACL 2023) for judged Hindi queries. Pooled df follows Pirkola's "
-        "structured queries (SIGIR 1998); the consistency metric is Rank-Biased Overlap (Webber et al., TOIS 2010); "
-        "the distillation follows Reimers and Gurevych (EMNLP 2020); the gate follows query performance prediction "
-        "(NQC, Shtok et al.) and cascade ranking (Wang, Lin and Metzler, SIGIR 2011). Full list in the references.</p>"
+        "<h2>1. Problem and Track Relevance</h2>"
+        "<h3>1.1 The user need</h3>"
+        "<p>On phones, Hindi is mostly typed in Roman letters (\"kal ka mausam\"), and every person spells words "
+        "in their own way. But most content people search for (Wikipedia, news, government pages) is written in "
+        "Devanagari (\"कल का मौसम\"). An inverted index matches exact terms, so a Roman query finds almost nothing, "
+        "even when the answer is in the index. The mixing also happens inside the data: " +
+        pct(corpus.get("share_of_docs_with_roman_words", 0)) + " of the MIRACL-Hindi passages we index already "
+        "contain Roman-script words. Our goal is simple to state: <b>the same question should get the same results, "
+        "whatever script it is typed in.</b></p>"
+        "<h3>1.2 Why it belongs to Track T5</h3>"
+        "<p>Track T5 asks for search in an Indian language with code-mixed or transliterated queries. Our system "
+        "covers every IR topic listed for the track:</p><ul>"
+        "<li>Tokenisation and normalisation for a non-English script (Devanagari).</li>"
+        "<li>A Hindi stemmer, compared with no stemming.</li>"
+        "<li>Soundex-style phonetic matching for transliterated spellings (our Dhvani key, compared with Soundex).</li>"
+        "<li>How stop words and idf behave on a Hindi corpus.</li>"
+        "<li>Cross-lingual ranking in a vector space (tf-idf cosine and a multilingual embedding model).</li></ul>"
+        "<h3>1.3 Papers referred</h3>"
+        "<p>Mixed-script retrieval was studied by Gupta et al. [2] and in the FIRE 2015 shared task [3]; we use the "
+        "MIRACL dataset [1] for judged Hindi queries. Pooled df is based on Pirkola's structured queries [4]; our "
+        "consistency metric uses Rank-Biased Overlap [5]; BM25 follows Robertson and Zaragoza [6]; the distillation "
+        "follows Reimers and Gurevych [11]; the gate uses ideas from query performance prediction [8] and cascade "
+        "ranking [9]. The course textbook [15] is the reference for all classic IR parts.</p>"
     )
 
 
+# ---------------------------------------------------------------- 2. IR
 def section_ir(n, t, corpus, params, top_terms):
-    stop_hits = corpus.get("top40_df_terms_in_stop_list", "?")
-    top_words = ", ".join([r["term"] for r in top_terms[:8]])
     return (
-        "<h2>2. How we used IR</h2>"
-        + figure("../pipeline.png", "Figure 1. LipiSetu pipeline. Orange boxes are our IR contributions, blue boxes "
-                 "are neural components. Every box names the file that implements it.")
-        + "<p><b>What is a document.</b> One MIRACL passage is one document (relevance labels are per passage), with "
-        "zones <i>title</i> and <i>body</i>. We index every passage judged for a dev or train query plus a seeded random "
-        "sample, " + "{:,}".format(corpus.get("documents", 0)) + " passages and " + "{:,}".format(corpus.get("tokens", 0)) +
-        " tokens in total (<span class=\"mono\">scripts/build_subsample.py</span>).</p>"
-        "<p><b>Tokenisation and normalisation</b> (<span class=\"mono\">text/tokenize.py, normalize.py</span>). Python's "
-        "<span class=\"mono\">\\w</span> does not match Devanagari vowel signs, so a regex tokenizer cuts हिन्दी into "
-        "three pieces; we tokenise with explicit Unicode ranges instead. Normalisation applies NFC, folds nukta "
-        "(क़→क), chandrabindu to anusvara, removes zero-width joiners, maps Devanagari digits, rewrites a half nasal "
-        "before a consonant as an anusvara (हिन्दी = हिंदी), and case-folds Roman text.</p>"
-        "<p><b>Stop words and idf on Hindi</b> (<span class=\"mono\">text/stopwords.py, scripts/corpus_stats.py</span>). "
-        "Hindi stop words are extremely frequent postpositions and auxiliaries: the eight highest-df terms are " +
-        top_words + ". " + str(stop_hits) + " of the 40 highest-df terms are in our stop list (Hindi, Hinglish and "
-        "English question words included). The corpus follows Zipf's law (appendix), and " +
-        "{:,}".format(corpus.get("terms_seen_once", 0)) + " of the " + "{:,}".format(corpus.get("vocabulary", 0)) +
-        " vocabulary terms occur only once, so most of the vocabulary has a very high idf. Stop words keep their "
-        "positions so phrase queries keep the right gaps.</p>"
-        "<p><b>Stemming</b> (<span class=\"mono\">text/stemmer.py</span>). A light suffix stripper after Ramanathan and "
-        "Rao (2003) maps लड़का / लड़के / लड़कों to one stem. It raises Devanagari nDCG@10 from " + n["b1n_f1"] +
-        " (no stemming, B1N) to " + n["b1_f1"] + " (B1).</p>"
-        "<p><b>Dhvani key</b> (<span class=\"mono\">text/dhvani.py</span>). A Soundex-style key that works on both "
-        "scripts: every consonant sound maps to one class, aspirated = unaspirated, retroflex = dental, w = v, z = j, "
-        "f = ph, a nasal before a consonant becomes N, vowels are dropped except at the start (which also handles "
-        "Hindi's silent inherent vowel), and repeated classes collapse. Unlike English Soundex the key is not cut to "
-        "four characters. मौसम, mausam, mosam and mousam all become <span class=\"mono\">MSM</span>. Classic Soundex "
-        "(<span class=\"mono\">text/soundex.py</span>) is implemented as a comparison.</p>"
-        "<p><b>Inverted index with zones</b> (<span class=\"mono\">index/inverted_index.py</span>). A dictionary plus "
-        "one postings file packed into numpy arrays, with positions. Zones: <i>all</i> (stemmed title + body), "
-        "<i>title</i>, <i>dhvani</i> (keys of every word), plus <i>soundex</i>, <i>nostem</i> and <i>raw</i> zones for "
-        "the baselines. Boolean AND/OR/NOT processes terms in order of increasing df and uses skip pointers; phrase "
-        "queries use positions (<span class=\"mono\">retrieval/boolean.py</span>).</p>"
-        "<p><b>Scoring</b> (<span class=\"mono\">retrieval/bm25.py, tfidf.py, proximity.py, topk.py</span>). BM25 per "
-        "zone, combined with zone weights, accumulated term-at-a-time in one score slot per document, with heap-based "
-        "top-K. tf-idf lnc.ltc cosine is implemented as the vector-space comparison.</p>"
-        '<div class="formula">score(d) = BM25<sub>all</sub>(d) + w<sub>dhvani</sub>·BM25<sub>dhvani</sub>(d) + '
-        "w<sub>title</sub>·BM25<sub>title</sub>(d) + λ·(m−1)/(window−1)</div>"
-        "<p>The last term is <b>query-term proximity</b>: the smallest window of Dhvani positions that contains all m "
-        "matched query words, applied to the top 100. <b>Pooled df</b>: a surface term uses the df of its Dhvani class, "
-        "i.e. the number of documents containing any spelling of that word (Pirkola's structured query, applied to "
-        "spelling variants instead of translations). All parameters were tuned on the <b>train</b> split only, with "
-        "the average nDCG@10 over the three query scripts as the objective: k1 = " + str(params.get("k1")) + ", b = " +
-        str(params.get("b")) + ", w<sub>dhvani</sub> = " + str(params.get("w_dhvani")) + ", w<sub>title</sub> = " +
-        str(params.get("w_title")) + ", λ = " + str(params.get("lambda_prox")) + ". Champion lists (r = 200) are "
-        "precomputed for the speed experiment.</p>"
+        "<h2>2. How We Used IR</h2>"
+        "<p>Figure 1 shows the whole pipeline. The left half is built once (offline); the right half runs for every "
+        "query. Each box names the file that implements it, so every IR idea can be traced to the code.</p>"
+        + figure("../pipeline.png", "<b>Figure 1:</b> LipiSetu pipeline. Orange boxes are our IR contributions, "
+                 "blue boxes are neural components.")
+        + ir_text_processing(n, corpus, top_terms)
+        + ir_dhvani()
+        + ir_index_and_scoring(n, params)
+        + ir_concept_table()
     )
 
 
+def ir_text_processing(n, corpus, top_terms):
+    top_words = ", ".join([r["term"] for r in top_terms[:6]])
+    return (
+        "<h3>2.1 Documents and text processing</h3>"
+        "<p><b>Documents.</b> One MIRACL passage is one document, because the relevance labels are given per "
+        "passage. Each document has a <i>title</i> and a <i>body</i> zone. We index every passage judged for any "
+        "query plus a fixed random sample: " + "{:,}".format(corpus.get("documents", 0)) + " passages and " +
+        "{:,}".format(corpus.get("tokens", 0)) + " tokens.</p>"
+        "<p><b>Tokenisation and normalisation</b> (<span class=\"mono\">text/tokenize.py, normalize.py</span>). "
+        "Python's <span class=\"mono\">\\w</span> does not match Devanagari vowel signs, so a normal regex breaks "
+        "हिन्दी into three pieces. We tokenise with explicit Unicode ranges instead. Normalisation applies Unicode NFC, "
+        "folds nukta letters (क़ → क), maps chandrabindu to anusvara, removes invisible joiners, converts Devanagari "
+        "digits, and lower-cases Roman text.</p>"
+        "<p><b>Stop words and idf.</b> Hindi stop words are very frequent postpositions and helper verbs; the most "
+        "frequent terms in our corpus are " + top_words + ". " + str(corpus.get("top40_df_terms_in_stop_list", "?")) +
+        " of the 40 highest-df terms are in our stop list (Hindi, Hinglish and English). The corpus follows "
+        "Zipf's law (Appendix G), and " + "{:,}".format(corpus.get("terms_seen_once", 0)) + " of the " +
+        "{:,}".format(corpus.get("vocabulary", 0)) + " vocabulary terms occur only once.</p>"
+        "<p><b>Stemming</b> (<span class=\"mono\">text/stemmer.py</span>). A light suffix stripper, after Ramanathan "
+        "and Rao [13], maps लड़का / लड़के / लड़कों to one stem. It raises Devanagari nDCG@10 from " + n["b1n_f1"] +
+        " (no stemming) to " + n["b1_f1"] + ".</p>"
+    )
+
+
+def ir_dhvani():
+    rows = [
+        ["Aspirated = unaspirated", "kh = k, bh = b (ख = क)", "people often skip the h"],
+        ["Retroflex = dental", "ट = त, ड = द", "Roman letters cannot show the difference"],
+        ["Drop vowels (keep a first vowel as A)", "mausam, mosam → MSM", "vowels are spelled in many ways"],
+        ["w = v, z = j, f = ph", "zindagi = jindagi", "common spelling swaps"],
+        ["Nasal before a consonant → N", "samvidhan = संविधान", "anusvara has no Roman letter"],
+        ["Collapse repeated sounds", "pakka = पक्का → PK", "double letters are optional"],
+    ]
+    return (
+        "<h3>2.2 The Dhvani key (our phonetic key)</h3>"
+        "<p>Soundex gives words that sound alike the same code, but it only works for English letters and cuts "
+        "codes to four characters. Our Dhvani key (<span class=\"mono\">text/dhvani.py</span>) works on <b>both "
+        "scripts</b>: each consonant sound in Devanagari or Roman maps to one letter class, and the rules in Table 1 "
+        "remove the differences that Roman spelling cannot show. मौसम, mausam, mosam and mousam all become "
+        "<span class=\"mono\">MSM</span>. We do not cut the key to four characters, because Hindi words are short "
+        "and cutting merges too many different words. Classic Soundex is also implemented, as a baseline.</p>"
+        + caption("Table 1: Dhvani key rules") + simple_table(["Rule", "Example", "Why"], rows)
+    )
+
+
+def ir_index_and_scoring(n, params):
+    return (
+        "<h3>2.3 Inverted index with zones</h3>"
+        "<p>The index (<span class=\"mono\">index/inverted_index.py</span>) is a dictionary plus postings lists "
+        "with positions, stored in numpy arrays. It has three main zones: <i>all</i> (stemmed words of title and "
+        "body), <i>title</i>, and <i>dhvani</i> (the key of every word). Extra zones (<i>soundex</i>, <i>nostem</i>, "
+        "<i>raw</i>) exist only for the baselines. Boolean AND/OR/NOT processes terms in order of increasing df "
+        "and uses skip pointers; phrase queries use the positions (<span class=\"mono\">retrieval/boolean.py</span>).</p>"
+        "<h3>2.4 Scoring</h3>"
+        "<p>Each zone is scored with BM25 (<span class=\"mono\">retrieval/bm25.py</span>), and the zone scores are "
+        "added with weights:</p>"
+        '<p class="eq">score(d) = BM25<sub>all</sub>(d) + w<sub>dhvani</sub>·BM25<sub>dhvani</sub>(d) + '
+        "w<sub>title</sub>·BM25<sub>title</sub>(d) + λ·(m − 1) / (window − 1)<span class=\"no\">(1)</span></p>"
+        "<p>The last term is <b>query-term proximity</b> (<span class=\"mono\">proximity.py</span>): the smallest "
+        "window of word positions that contains all m matched query words. It is applied to the top 100 results. "
+        "<b>Pooled df</b> fixes a subtle problem: one word can have many spellings, and each spelling alone looks "
+        "rare, so its idf becomes too high. With pooled df, every spelling uses the df of its whole Dhvani class "
+        "(all documents that contain any spelling of the word). This is Pirkola's idea [4], applied to spellings "
+        "instead of translations. Scores are accumulated term-at-a-time and the top K are taken with a heap "
+        "(<span class=\"mono\">topk.py</span>). We also implement tf-idf (lnc.ltc cosine) as the vector-space "
+        "comparison. All parameters were tuned on the <b>train split only</b>: k1 = " + str(params.get("k1")) +
+        ", b = " + str(params.get("b")) + ", w<sub>dhvani</sub> = " + str(params.get("w_dhvani")) +
+        ", w<sub>title</sub> = " + str(params.get("w_title")) + ", λ = " + str(params.get("lambda_prox")) + ".</p>"
+    )
+
+
+def ir_concept_table():
+    rows = [
+        ["Boolean retrieval", "AND/OR/NOT, df-ordered merge, skip pointers, phrase queries", "retrieval/boolean.py"],
+        ["Term vocabulary", "Tokeniser, normaliser, stop words, stemmer, Soundex, Dhvani key", "text/"],
+        ["Index construction", "Positional inverted index with zones, lnc norms", "index/inverted_index.py"],
+        ["tf-idf and VSM", "log tf, idf, lnc.ltc cosine", "retrieval/tfidf.py"],
+        ["Scoring", "BM25 per zone, zone weights, pooled df", "retrieval/bm25.py"],
+        ["Result assembly", "Heap top-K, champion lists, query-term proximity", "retrieval/topk.py, proximity.py"],
+        ["Static quality g(d)", "Lead-passage prior used as a ranking feature", "rerank/ltr.py"],
+        ["Cluster pruning", "√N leaders, followers of the nearest leaders scored", "dense/cluster_pruning.py"],
+        ["Evaluation", "P@k, Recall@k, MRR, nDCG, RBO, significance test", "eval/metrics.py"],
+    ]
+    return caption("Table 2: IR concepts from the course and where they are in our code") + \
+        simple_table(["Lecture topic", "What we implemented", "File (src/lipisetu/)"], rows)
+
+
+# ---------------------------------------------------------------- 3. Beyond IR
 def section_beyond(n, t, scd, point):
     sizes = scd.get("size_mb", {})
     epochs = scd.get("epochs", [])
     after = epochs[-1]["held_out_cosine"] if epochs else 0
     return (
         "<h2>3. Beyond IR</h2>"
-        "<p><b>Dense retrieval</b> (<span class=\"mono\">dense/</span>). Passages are encoded once with "
-        "multilingual-e5-small, exported to ONNX and quantised to int8 (cosine with the fp32 vectors ≈ 0.98). "
-        "Search is a dot product over the passage vectors, or <b>cluster pruning</b> from the lectures "
-        "(√N leaders; only the followers of the 8 nearest leaders are scored).</p>"
-        "<p><b>Script-Consistency Distillation (SCD).</b> A student copy of the encoder is trained so that a Roman "
-        "spelling of a train query lands on the teacher's embedding of the Devanagari query (loss = 1 − cosine). "
-        "Only the query encoder changes, so the passage vectors are reused. On held-out train queries the cosine "
-        "between a Roman query and its Devanagari target rises from " + "%.3f" % scd.get("held_out_cosine_before", 0) +
-        " to " + "%.3f" % after + ". The 250,002-token vocabulary is then pruned to the " +
-        "{:,}".format(scd.get("vocab_pruned", 0)) + " tokens used by the corpus and train queries, and the model is "
-        "quantised: " + "%.0f" % sizes.get("full_fp32", 0) + " MB → " + "%.0f" % sizes.get("pruned_int8", 0) + " MB.</p>"
-        "<p><b>Learning to rank</b> (<span class=\"mono\">rerank/ltr.py</span>). A logistic regression over IR "
-        "features of each candidate (BM25 per zone, proximity, tf-idf, dense cosine, reciprocal ranks, a static "
-        "quality prior g(d) for the first passage of an article, length). Trained on train judgments.</p>"
-        "<p><b>Gated cascade</b> (<span class=\"mono\">cascade/gate.py</span>). Features that the sparse stage gives "
-        "for free (top score, score gap, NQC, share of words matched only through Dhvani, unmatched words, max idf, "
-        "length, script) predict whether the neural stage will improve nDCG@10. The threshold is chosen on train as "
-        "the fewest neural calls that keep 99% of the always-neural quality.</p>"
+        "<p><b>Dense retrieval</b> (<span class=\"mono\">dense/</span>). Every passage is turned into a vector once "
+        "with the multilingual-e5-small model [14], exported to ONNX and compressed to int8 so it runs fast on a "
+        "laptop CPU. A query is answered with a dot product over all passage vectors, or approximately with "
+        "cluster pruning from the lectures.</p>"
+        "<p><b>Script-consistency distillation (SCD).</b> We train a copy of the encoder (the student) so that a "
+        "Roman spelling of a question lands at the same point as the original model's vector for the Devanagari "
+        "question (loss = 1 − cosine), following [11]. Only the query side changes, so the passage vectors are "
+        "reused. On held-out train questions, the cosine between a Roman question and its Devanagari target rises "
+        "from " + "%.3f" % scd.get("held_out_cosine_before", 0) + " to " + "%.3f" % after + ". We then keep only the " +
+        "{:,}".format(scd.get("vocab_pruned", 0)) + " tokens our data uses (out of 250,002) [12] and compress to int8: "
+        + "%.0f" % sizes.get("full_fp32", 0) + " MB → " + "%.0f" % sizes.get("pruned_int8", 0) + " MB.</p>"
+        "<p><b>Learning to rank</b> (<span class=\"mono\">rerank/ltr.py</span>). A logistic regression re-orders the "
+        "candidates using IR features: BM25 per zone, proximity, tf-idf, the dense score, ranks in both lists, the "
+        "static quality prior and passage length [10]. It is trained on the train judgments only.</p>"
+        "<p><b>Gated cascade</b> (<span class=\"mono\">cascade/gate.py</span>). The neural stage is slow, and it "
+        "does not always help. The gate looks at signals the fast search gives for free (top score, score gap, "
+        "NQC [8], how many words matched only through the Dhvani zone, max idf, query length, script) and predicts "
+        "whether running the neural stage will improve the ranking. Its threshold is chosen on the train split.</p>"
     )
 
 
+# ---------------------------------------------------------------- 4. Novelty
 def section_novelty(n):
     rows = [
-        ["Evaluation", "average nDCG / P@k only", "Script Gap, cross-script consistency (RBO@10), worst-script nDCG"],
-        ["Roman queries", "transliterate the query, then BM25 (B2)", "Dhvani zone in the index; no transliteration model"],
-        ["df for variants", "each spelling has its own df", "pooled df across spellings (Pirkola-style)"],
-        ["Neural stage", "always on, or absent", "run only when an IR-signal gate predicts it helps"],
-        ["Model size", "off-the-shelf encoder", "script-consistency distillation + vocabulary pruning + int8"],
-        ["Ranking signals", "fixed weights", "zone weights tuned on train; learning to rank over IR features"],
+        ["Evaluation", "Average nDCG or P@k only", "Script Gap, cross-script consistency (RBO), worst-script nDCG"],
+        ["Roman queries", "Transliterate the query, then BM25", "Dhvani zone inside the index, no transliteration model"],
+        ["df of spelling variants", "Each spelling has its own df", "Pooled df across spellings"],
+        ["Neural stage", "Always on, or not used", "Runs only when an IR-signal gate says it helps"],
+        ["Model size", "Off-the-shelf encoder", "Distilled for script consistency, pruned, int8 (37 MB)"],
+        ["Test queries", "Generated variants only", "Also 60 questions romanised by 3 people independently"],
     ]
-    html = "<h2>4. Novelty and creativity</h2>"
-    html += "<p>The obvious T5 project (and the PDF's own sample idea) is a Hinglish engine that transliterates the "
-    html += "query and ranks with BM25; that is our baseline B2. What is different:</p>"
-    html += "<table><thead><tr><th>aspect</th><th>obvious baseline</th><th>LipiSetu</th></tr></thead><tbody>"
-    for r in rows:
-        html += "<tr><td>%s</td><td>%s</td><td>%s</td></tr>" % (r[0], r[1], r[2])
-    html += "</tbody></table>"
-    html += ("<p><b>Prior art, honestly.</b> Mixed-script IR is not new (Gupta et al. 2014; FIRE MSIR) and Indic "
-             "Soundex variants exist (e.g. libindic). We do not claim to be first. To our knowledge the combination "
-             "here is new for Hindi on MIRACL: script invariance measured explicitly, a cross-script phonetic zone "
-             "with pooled df inside a classic BM25 engine with a rule-by-rule ablation, and neural inference gated by "
-             "IR signals and reported as a quality-versus-compute curve.</p>")
-    return html
+    return (
+        "<h2>4. Novelty and Creativity</h2>"
+        "<p>The obvious T5 project, and the sample idea in the assignment, is a Hinglish search engine that "
+        "transliterates the query and ranks it with BM25. In our project that is only the baseline (B2). Table 3 "
+        "lists what we do differently.</p>"
+        + caption("Table 3: The obvious approach compared with LipiSetu")
+        + simple_table(["Aspect", "Obvious approach", "LipiSetu"], rows)
+        + "<p><b>Prior work.</b> Mixed-script search is not new [2, 3], and Soundex variants for Indian languages "
+        "exist. We do not claim to be the first. To our knowledge, what is new for Hindi on MIRACL is the "
+        "combination: measuring script invariance directly, a cross-script phonetic zone with pooled df inside a "
+        "classic BM25 engine (with a rule-by-rule ablation), and neural inference that is gated by IR signals and "
+        "reported as a quality-versus-compute trade-off.</p>"
+    )
 
 
+# ---------------------------------------------------------------- 5. Evaluation
 def section_evaluation(n, t, point, human):
-    html = "<h2>5. Evaluation</h2>"
-    html += ("<p><b>Setup.</b> Test: the 350 MIRACL-Hindi dev queries (3,494 judgments, about 2.1 relevant passages per "
-             "query, so P@10 cannot exceed about 0.2 and nDCG@10 is our main metric). Every query is run in three "
-             "forms: F1 the original Devanagari, F2 a standard Hinglish romanisation, F3 a casual romanisation with "
-             "seeded spelling noise (<span class=\"mono\">text/romanize.py</span>). Tuning and training use only the "
-             "1,169 train queries. Unjudged passages count as non-relevant. <b>Script Gap</b> = nDCG(F1) − nDCG(form); "
-             "<b>CSC@10</b> = mean pairwise RBO (p = 0.9) between the top-10 lists of the three forms; "
-             "<b>worst-script nDCG</b> = mean over queries of the lowest nDCG@10 among the forms.</p>")
-    html += "<h3>Table 1. Effectiveness (dev, 350 queries)</h3>" + t["effectiveness"]
-    html += "<h3>Table 2. Script invariance</h3>" + t["invariance"]
-    html += ('<div class="two">' + figure("../../results/fig_ndcg_by_system.png", "Figure 2. nDCG@10 by system and query script.")
-             + figure("../../results/fig_budget_curve.png", "Figure 3. Quality vs share of queries that run the neural stage.") + "</div>")
-    html += ("<p><b>The Script Gap is real and large.</b> BM25 with stemming (B1) reaches " + n["b1_f1"] + " on "
-             "Devanagari queries and " + n["b1_f2"] + " on the same questions in Roman script. The obvious fix, "
-             "transliterating the query (B2), only recovers " + n["b2_f2"] + " / " + n["b2_f3"] + " (standard / casual "
-             "Roman), because casual Hinglish spellings are not valid transliteration input (\"bharat\" becomes भरत, "
-             "not भारत). Classic Soundex (S0) helps (" + n["s0_f2"] + ") but its 4-character English codes merge too "
-             "much. The Dhvani zone (S1) reaches " + n["s1_f2"] + " / " + n["s1_f3"] + ", and with pooled df (S2) the "
-             "casual-Roman Script Gap falls from " + n["b2_gap3"] + " (B2) to " + n["s2_gap3"] + ", while cross-script "
-             "consistency rises from " + n["b2_csc"] + " to " + n["s2_csc"] + ". Every one of these Roman-query gains is "
-             "significant (p &lt; 0.001).</p>"
-             "<p><b>Neural models have their own script problem.</b> The base dense model (D0) is the best single "
-             "system for Devanagari (" + n["d0_f1"] + ") but scores " + n["d0_f3"] + " on casual Roman: for a Roman "
-             "query it retrieves other Roman-script passages, i.e. it matches the script before the meaning. "
-             "Script-consistency distillation (D1) fixes part of this (" + n["d1_f3"] + ") at almost no cost on "
-             "Devanagari (" + n["d1_f1"] + "), but stays far below the Dhvani zone on Roman queries. Plain fusion "
-             "(H1) is best on Devanagari (" + n["h1_f1"] + ") but drags Roman queries down to " + n["h1_f2"] + ", so "
-             "fusion alone is not script-invariant. Learning to rank (L1) uses both signals and is the best system "
-             "on every script (" + n["l1_f1"] + " / " + n["l1_f2"] + " / " + n["l1_f3"] + "), with the highest "
-             "worst-script nDCG (" + n["l1_worst"] + " vs " + n["b2_worst"] + " for B2).</p>"
-             "<p><b>The gate spends neural compute where it helps.</b> Because the neural stage helps Devanagari "
-             "queries and hurts many Roman ones, always running it (" + n["op_neural"] + " over all dev queries and "
-             "forms) is worse than never running it (" + n["op_sparse"] + "). The gate, with its threshold chosen on "
-             "train, runs the neural stage for " + n["op_share"] + " of queries and reaches " + n["op_ndcg"] + ", "
-             "better than both extremes and well above a random gate with the same budget (Figure 3; an oracle "
-             "reaches " + n["op_oracle"] + " at " + n["op_oracle_share"] + "). The cascade's median latency is " +
-             n["g1_ms"] + " ms against " + n["h1_ms"] + " ms for always-hybrid and " + n["l1_ms"] + " ms for LTR.</p>"
-             "<p><b>tf-idf vs BM25.</b> lnc.ltc (V1) scores " + n["v1_f1"] + " against " + n["b1_f1"] + " for BM25. "
-             "Full cosine normalisation over-rewards short passages: the median length of V1's top passage is " +
-             n["v1_len"] + " terms, against " + n["corpus_len"] + " for the corpus and " + n["b1_len"] + " for BM25, "
-             "whose tuned b = 0.5 normalises length only partly (results/e13_length_bias.json).</p>"
-             "<p><b>Pooled df.</b> On the Devanagari-only corpus pooled df trades a little Devanagari accuracy (" +
-             n["s1_f1"] + " → " + n["s2_f1"] + ") for Roman accuracy and consistency. On the mixed-script corpus, "
-             "where a word's df really is split between spellings, it helps every form (Table 4): standard Roman "
-             + n["mixed_s1_f2"] + " → " + n["mixed_s2_f2"] + ", casual Roman " + n["mixed_s1_f3"] + " → " +
-             n["mixed_s2_f3"] + ", consistency " + n["mixed_s1_csc"] + " → " + n["mixed_s2_csc"] + ".</p>"
-             "<p><b>Ablation.</b> Dropping vowels is by far the most important Dhvani rule, followed by merging "
-             "retroflex and dental sounds (Table 3). Collapsing doubled letters slightly hurts; we keep the rule set "
-             "fixed as designed rather than tune it on the test queries.</p>")
-    html += "<h3>Table 3. Dhvani rule ablation (one rule switched off, Dhvani zone rebuilt)</h3>" + t["ablation"]
-    html += "<h3>Table 4. Pooled df on a mixed-script corpus (30% of passages romanised, synthetic)</h3>"
-    html += '<div class="two"><div>' + t["mixed"] + "</div><div>" + t["idf"] + "</div></div>"
-    html += "<h3>Table 5. Efficiency structures</h3>" + t["structures"]
-    html += ("<p class=\"small\">Skip pointers halve the comparisons of AND merges. Champion lists are 5-6x "
-             "faster but lose a lot of quality, mostly for Roman queries whose Dhvani postings are long. Cluster "
-             "pruning scores about 5% of the vectors and keeps half of the exact top 100, but on this laptop it is "
-             "not faster: one numpy dot product over all 110k vectors already takes only a few milliseconds, so "
-             "collecting the followers costs as much as it saves. It should only pay off on a much larger "
-             "collection. In pure Python the heap top-K is slower than numpy's C sort even though it is "
-             "asymptotically better.</p>")
-    html += ("<p><b>Significance.</b> Paired randomisation tests (10,000 permutations, nDCG@10, appendix D) give "
-             "p &lt; 0.001 for every Roman-query gain listed above (S1 over B1 and S0, S3 over B2, D1 over D0, L1 and "
-             "G1 over H1) and for H1 over S3 on Devanagari. On Devanagari queries the sparse systems are not "
-             "significantly different from B1/B2 (no loss), and G1 is not significantly different from the "
-             "always-hybrid H1, even though it runs the neural stage for only a third of the queries.</p>")
-    if human:
-        html += ("<p><b>Human query set.</b> Three team members romanised the same 60 dev queries independently "
-                 "(no transliteration tools), and each wrote code-mixed and English versions of 20 of them. All three "
-                 "spelled a word identically for " + pct(human.get("same_spelling_all_three", 0)) + " of words, but the "
-                 "Dhvani keys agreed for " + pct(human.get("same_dhvani_key_all_three", 0)) + ". On the real "
-                 "romanisations BM25 reaches only " + n["hum_b1_r"] + " and transliteration " + n["hum_b2_r"] +
-                 ", while S3 reaches " + n["hum_s3_r"] + " (p ≤ " + n["hum_p_s3_b2"] + " against B2 for every "
-                 "annotator) and learning to rank " + n["hum_l1_r"] + " (p ≤ " + n["hum_p_l1_h1"] + " against H1). "
-                 "So the synthetic results hold for real spelling variation. Code-mixed and English queries are "
-                 "different: a phonetic key cannot link <i>leader</i> to नेता, so S3 drops to " + n["hum_s3_cm"] +
-                 " (code-mixed) and " + n["hum_s3_en"] + " (English), and only the dense stage helps (D1 " +
-                 n["hum_d1_en"] + " on English, L1 " + n["hum_l1_cm"] + " on code-mixed). The gate was trained on "
-                 "Devanagari and romanised queries only, and it under-calls the neural stage here: G1 is below the "
-                 "always-hybrid H1 on code-mixed (" + n["hum_g1_cm"] + " vs " + n["hum_h1_cm"] + ", p = " +
-                 n["hum_p_g1_h1_cm"] + ") and English (" + n["hum_g1_en"] + " vs " + n["hum_h1_en"] + ", p = " +
-                 n["hum_p_g1_h1_en"] + ").</p>" + t["human"])
-    return html
+    return (
+        "<h2>5. Evaluation</h2>"
+        + eval_setup()
+        + eval_main(n, t)
+        + eval_neural_and_gate(n)
+        + eval_human(n, t, human)
+        + eval_ablation(n, t)
+        + eval_efficiency_and_significance(n)
+    )
 
 
+def eval_setup():
+    return (
+        "<h3>5.1 Setup</h3>"
+        "<p><b>Queries and judgments.</b> The test set is the 350 MIRACL-Hindi dev queries (3,494 judged passages, "
+        "about 2.1 relevant passages per query). All tuning and training uses the separate 1,169 train queries "
+        "only. Every test query is asked in three forms: <b>F1</b> the original Devanagari, <b>F2</b> a standard "
+        "Roman spelling, and <b>F3</b> a casual Roman spelling with random spelling noise "
+        "(<span class=\"mono\">text/romanize.py</span>). Unjudged passages count as not relevant.</p>"
+        "<p><b>Metrics.</b> nDCG@10 is the main metric. P@10 is reported too, but with only about 2 relevant "
+        "passages per query it cannot go above about 0.2. To measure script invariance we add three metrics:</p><ul>"
+        "<li><b>Script Gap</b> = nDCG@10 for Devanagari minus nDCG@10 for a Roman form (0 = script does not matter).</li>"
+        "<li><b>CSC@10</b> (cross-script consistency) = average Rank-Biased Overlap [5] between the top-10 lists of "
+        "the three forms (1 = identical rankings).</li>"
+        "<li><b>Worst-script nDCG@10</b> = for each query, the nDCG@10 of its worst form, averaged.</li></ul>"
+        "<p><b>Systems.</b> B0 raw BM25; B1 BM25 with normalisation and stemming; B1N without stemming; B2 "
+        "transliteration + BM25 (the obvious baseline); V1 tf-idf cosine; S0 B1 + Soundex zone; S1 B1 + Dhvani "
+        "zone; S2 S1 + pooled df; S3 S2 + title zone + proximity; D0 dense e5-small; D1 our distilled encoder; H1 "
+        "S3 + D1 fused with RRF [7]; L1 learning to rank; G1 the gated cascade.</p>"
+    )
+
+
+def eval_main(n, t):
+    return (
+        "<h3>5.2 Main results</h3>"
+        + '<div class="two">'
+        + figure("../../results/fig_ndcg_by_system.png", "<b>Figure 2:</b> nDCG@10 by system and query script.")
+        + figure("../../results/fig_budget_curve.png", "<b>Figure 3:</b> Quality against the share of queries "
+                 "that run the neural stage.")
+        + "</div>"
+        + caption("Table 4: Search quality on the 350 test queries (bold = our main systems)") + t["effectiveness"]
+        + "<p><b>The Script Gap is real and large.</b> BM25 with stemming (B1) reaches " + n["b1_f1"] + " on "
+        "Devanagari questions but " + n["b1_f2"] + " on the same questions in Roman. Transliterating the query "
+        "(B2) only recovers " + n["b2_f2"] + " / " + n["b2_f3"] + " (standard / casual Roman), because casual "
+        "spellings are not valid transliteration input: <i>bharat</i> becomes भरत (a name), not भारत (India). "
+        "Classic Soundex (S0) helps (" + n["s0_f2"] + ") but its four-character English codes merge too many words. "
+        "The Dhvani zone (S1) reaches " + n["s1_f2"] + " / " + n["s1_f3"] + ", with almost no loss on Devanagari.</p>"
+        + caption("Table 5: Script invariance (lower Script Gap and higher CSC are better)") + t["invariance"]
+        + "<p>With pooled df (S2), the Script Gap on casual Roman falls from " + n["b2_gap3"] + " (B2) to " +
+        n["s2_gap3"] + ", and cross-script consistency rises from " + n["b2_csc"] + " to " + n["s2_csc"] + ". "
+        "In other words, LipiSetu gives almost the same answer whichever script the question is typed in.</p>"
+    )
+
+
+def eval_neural_and_gate(n):
+    return (
+        "<h3>5.3 Neural models and the gate</h3>"
+        "<p><b>Neural models have their own script problem.</b> The plain dense model (D0) is the best single "
+        "model on Devanagari (" + n["d0_f1"] + ") but scores " + n["d0_f3"] + " on casual Roman: for a Roman "
+        "question it finds other Roman-script passages, so it matches the script before the meaning. Our "
+        "distillation (D1) fixes part of this (" + n["d1_f3"] + ") at almost no cost on Devanagari (" + n["d1_f1"] +
+        "), but stays far below the Dhvani zone on Roman. Simple fusion (H1) is best on Devanagari (" + n["h1_f1"] +
+        ") but pulls Roman down to " + n["h1_f2"] + ". Learning to rank (L1) uses both signals and is the best "
+        "system on every script (" + n["l1_f1"] + " / " + n["l1_f2"] + " / " + n["l1_f3"] + "), with the highest "
+        "worst-script nDCG (" + n["l1_worst"] + " against " + n["b2_worst"] + " for B2).</p>"
+        "<p><b>The gate spends neural compute only where it helps.</b> Because the neural stage helps Devanagari "
+        "questions but hurts many Roman ones, always running it (" + n["op_neural"] + ") is worse than never "
+        "running it (" + n["op_sparse"] + "). With its threshold chosen on train, the gate runs the neural stage "
+        "for " + n["op_share"] + " of queries and reaches " + n["op_ndcg"] + ", better than both, and clearly "
+        "above a random gate with the same budget (Figure 3). Its median latency is " + n["g1_ms"] + " ms, against " +
+        n["h1_ms"] + " ms for always running the neural stage.</p>"
+        "<p><b>tf-idf against BM25.</b> lnc.ltc cosine (V1) scores " + n["v1_f1"] + " against " + n["b1_f1"] +
+        " for BM25. Full cosine normalisation favours short passages: the median length of V1's top result is " +
+        n["v1_len"] + " terms, against " + n["corpus_len"] + " for the corpus and " + n["b1_len"] + " for BM25.</p>"
+    )
+
+
+def eval_human(n, t, human):
+    if not human:
+        return ""
+    return (
+        "<h3>5.4 Human query set</h3>"
+        "<p>Our Roman test forms are generated by a program, so we also built a small test set from real typing. "
+        "Each of the three team members took the same 60 test questions and typed them in Roman letters on their "
+        "own, without any transliteration tool and without looking at each other's sheets. Each member also wrote "
+        "code-mixed and English versions of 20 questions. All three spelled a word identically for only " +
+        pct(human.get("same_spelling_all_three", 0)) + " of the words, but their Dhvani keys were the same for " +
+        pct(human.get("same_dhvani_key_all_three", 0)) + " of the words.</p>"
+        + caption("Table 6: nDCG@10 on the human query set (60 questions; A1–A3 are the three annotators)") + t["human"]
+        + "<p>On the real romanisations BM25 reaches only " + n["hum_b1_r"] + " and transliteration " +
+        n["hum_b2_r"] + ", while LipiSetu (S3) reaches " + n["hum_s3_r"] + " (p ≤ " + n["hum_p_s3_b2"] + " against B2 "
+        "for every annotator) and learning to rank " + n["hum_l1_r"] + ". So the results on generated queries hold "
+        "for real spelling variation. Code-mixed and English questions are different: a sound key cannot link "
+        "<i>leader</i> to नेता, so S3 drops to " + n["hum_s3_cm"] + " (code-mixed) and " + n["hum_s3_en"] +
+        " (English), and only the neural encoder helps (D1 " + n["hum_d1_en"] + " on English). The gate never saw "
+        "such questions in training and calls the neural stage too rarely for them (G1 " + n["hum_g1_en"] +
+        " against H1 " + n["hum_h1_en"] + " on English, p = " + n["hum_p_g1_h1_en"] + ").</p>"
+    )
+
+
+def eval_ablation(n, t):
+    return (
+        "<h3>5.5 Which parts matter</h3>"
+        + caption("Table 7: Dhvani rule ablation (one rule switched off, Dhvani zone rebuilt)") + t["ablation"]
+        + "<p><b>Ablation.</b> Dropping vowels is by far the most important rule, followed by merging retroflex "
+        "and dental sounds (Table 7). Collapsing doubled letters slightly hurts; we kept the rule set as designed "
+        "instead of tuning it on the test queries.</p>"
+        + caption("Table 8: Pooled df on a mixed-script corpus (30% of passages romanised)") + t["mixed"]
+        + "<p><b>Pooled df.</b> On the Devanagari-only corpus, pooled df trades a little Devanagari accuracy (" +
+        n["s1_f1"] + " → " + n["s2_f1"] + ") for Roman accuracy and consistency. On a corpus where 30% of passages "
+        "are romanised, a word's df really is split between its spellings, and pooled df helps every form: "
+        "standard Roman " + n["mixed_s1_f2"] + " → " + n["mixed_s2_f2"] + ", casual Roman " + n["mixed_s1_f3"] +
+        " → " + n["mixed_s2_f3"] + ", consistency " + n["mixed_s1_csc"] + " → " + n["mixed_s2_csc"] +
+        " (idf examples in Appendix F).</p>"
+    )
+
+
+def eval_efficiency_and_significance(n):
+    return (
+        "<h3>5.6 Efficiency and significance</h3>"
+        "<p><b>Efficiency</b> (Appendix A and E, laptop CPU, no GPU). The sparse engine S3 answers in " + n["s3_ms"] +
+        " ms (median). Skip pointers halve the comparisons in AND merges. Champion lists are 5–6 times faster but "
+        "lose a lot of quality. Cluster pruning scores only about 5% of the passage vectors and keeps half of the "
+        "exact top 100, but on our laptop it is not faster, because one numpy dot product over 110k vectors already "
+        "takes only a few milliseconds.</p>"
+        "<p><b>Significance</b> (Appendix D). Paired randomisation tests (10,000 permutations, nDCG@10) give "
+        "p &lt; 0.001 for every Roman-query gain discussed above (S1 over B1 and S0, S3 over B2, D1 over D0, L1 and "
+        "G1 over H1). On Devanagari questions the sparse systems are not significantly different from B1/B2, so "
+        "the gains on Roman come without a loss on Devanagari.</p>"
+    )
+
+
+# ---------------------------------------------------------------- 6-7
 def section_limitations(n):
     return (
-        "<h2>6. Limitations and next steps</h2><ul>"
-        "<li>The corpus is a subsample of MIRACL-Hindi (all judged passages + a random sample), so absolute scores are "
-        "not comparable to the MIRACL leaderboard; unjudged passages count as non-relevant.</li>"
-        "<li>The Roman query forms and the mixed-script corpus are synthetic (my romaniser); the human query set is "
-        "the realistic check.</li>"
-        "<li>Dhvani merges some different words: <i>kal</i> (कल, yesterday) and खेल (khel, game) share the key KL, "
-        "because aspiration and vowels are dropped. Words whose spoken form drops a vowel (कमला / kamla) get different "
-        "keys. Zone weights limit the damage but do not remove it.</li>"
-        "<li>English words inside code-mixed queries are only matched by the dense stage, and the gate never saw "
-        "code-mixed or English queries in training, so it runs the dense stage too rarely for them.</li>"
-        "<li>The human set is small (60 queries), and one annotator (me) designed the Dhvani key, so that "
+        "<h2>6. Limitations and Next Steps</h2><ul>"
+        "<li><b>Sound keys merge some different words.</b> <i>kal</i> (कल, tomorrow) and <i>khel</i> (खेल, game) "
+        "both become KL, so sports passages can appear for a weather question (shown live in our video). Zone "
+        "weights reduce this but do not remove it.</li>"
+        "<li><b>Meaning, not sound.</b> English words in code-mixed questions (<i>leader</i> for नेता) are only "
+        "matched by the neural stage, and the gate was not trained on such questions.</li>"
+        "<li><b>Subsampled corpus.</b> We index a subsample of MIRACL-Hindi, so our scores are not comparable to "
+        "the MIRACL leaderboard.</li>"
+        "<li><b>Small human set.</b> 60 questions; one annotator (Devansh) also designed the Dhvani key, so his "
         "romanisation is not blind.</li>"
-        "<li>Hindi only.</li></ul>"
-        "<p><b>Course-project roadmap.</b> (1) Bengali and Telugu from MIRACL with per-language Dhvani tables; "
-        "(2) a larger human query set and voice queries; (3) the int8 encoder in the browser with ONNX Runtime Web, so "
-        "search runs fully on the device; (4) learned key rules instead of hand-written ones; (5) a short paper for "
-        "FIRE.</p>"
+        "<li><b>Hindi only.</b></li></ul>"
+        "<p><b>Roadmap (if continued as the course project):</b> (1) Bengali and Telugu from MIRACL with their own "
+        "Dhvani tables; (2) a larger human query set, including voice queries; (3) the int8 encoder running in the "
+        "browser, so search works fully on a phone; (4) learning the key rules from data instead of writing them "
+        "by hand.</p>"
     )
 
 
 def section_work_division():
-    return (
-        "<h2>7. Work division</h2>"
-        "<p><b>Devansh Pandey</b>: idea and system design; text pipeline, inverted index, Boolean/phrase, tf-idf, BM25, "
-        "proximity, top-K and champion lists; the Dhvani key and pooled df; dense retrieval, script-consistency "
-        "distillation, vocabulary pruning, cluster pruning; learning to rank; the gated cascade; the evaluation "
-        "framework and metrics; the demo; the report. <b>Anamika Pal</b>: annotated the human query set (60 romanised "
-        "queries, code-mixed and English versions of rows 21–40); analysed the annotator-agreement results and "
-        "presents them in the video. <b>Abhinav Bachchas</b>: annotated the human query set (60 romanised queries, "
-        "code-mixed and English versions of rows 41–60); reviewed the final results and plots and proofread the "
-        "report; presents the results and the live limitation in the video.</p>"
-    )
+    rows = [
+        ["Devansh Pandey<br>2310110461",
+         "Idea and system design; text pipeline, inverted index, Boolean and phrase search, tf-idf, BM25, proximity, "
+         "top-K and champion lists; the Dhvani key and pooled df; dense retrieval, distillation, vocabulary pruning, "
+         "cluster pruning; learning to rank; the gated cascade; evaluation framework and metrics; demo; report; one "
+         "of the three annotators (code-mixed and English for rows 1–20)."],
+        ["Anamika Pal<br>2310110037",
+         "Annotated the human query set (60 romanised questions; code-mixed and English for rows 21–40); analysed "
+         "the annotator-agreement results and presents them in the video."],
+        ["Abhinav Bachchas<br>2310110383",
+         "Annotated the human query set (60 romanised questions; code-mixed and English for rows 41–60); reviewed "
+         "the final results and plots; proofread the report; presents the evaluation and the live limitation in "
+         "the video."],
+    ]
+    return "<h2>7. Work Division</h2>" + caption("Table 9: Who worked on what") + \
+        simple_table(["Member", "Contribution"], rows)
 
 
 def section_ai():
     return (
-        "<h2>AI-use declaration</h2>"
+        "<h2>AI-Use Declaration</h2>"
         "<p>We used Claude Code (an AI coding assistant by Anthropic) to help brainstorm and plan the project, write "
-        "and refactor code, write tests, run the experiments and draft documentation. Devansh chose the track and the final idea, directed "
-        "the work, reviewed the code and checked the results. The human query annotations were written without AI "
-        "tools. Every number in this report was produced by the scripts in the repository on the real data.</p>"
+        "and refactor code, write tests, run the experiments and draft documentation. Devansh chose the track and the "
+        "final idea, directed the work, reviewed the code and checked the results. The human query annotations were "
+        "written by the three of us without AI tools. Every number in this report was produced by the scripts in "
+        "the repository on the real data.</p>"
     )
 
 
@@ -355,18 +511,19 @@ def section_references():
     html = '<h2>References</h2><ol class="refs">'
     for r in refs:
         html += "<li>" + r + "</li>"
-    return html + "</ol><p class=\"small\">Data: MIRACL (Apache-2.0), passage text from Wikipedia (CC BY-SA 3.0). "\
+    return html + "</ol><p class=\"note\">Data: MIRACL (Apache-2.0), passage text from Wikipedia (CC BY-SA 3.0). " \
         "Model: intfloat/multilingual-e5-small (MIT).</p>"
 
 
 def section_appendix(t, params):
     return (
         '<h2 class="pb">Appendix</h2>'
-        "<h3>A. Query latency per system (laptop CPU, Intel i5-12450H, no GPU)</h3>" + t["efficiency"]
-        + '<div class="two"><div><h3>B. Learning-to-rank weights</h3>' + t["ltr"] + "</div>"
-        + "<div><h3>C. Gate weights</h3>" + t["gate"] + "</div></div>"
-        + "<h3>D. Significance (paired randomisation test, 10,000 permutations, nDCG@10)</h3>" + t["significance"]
-        + '<div class="two">' + figure("../../results/fig_zipf.png", "Zipf plot of the corpus.")
-        + figure("../../results/fig_idf_hist.png", "idf distribution of the vocabulary.") + "</div>"
-        + figure("../../results/fig_dhvani_ablation.png", "Dhvani rule ablation (CSC@10).", "70%")
+        + caption("A. Query latency per system (laptop CPU, Intel i5-12450H, no GPU)") + t["efficiency"]
+        + '<div class="two"><div>' + caption("B. Learning-to-rank feature weights") + t["ltr"] + "</div>"
+        + "<div>" + caption("C. Gate feature weights") + t["gate"] + "</div></div>"
+        + caption("D. Significance tests (paired randomisation, 10,000 permutations, nDCG@10)") + t["significance"]
+        + caption("E. Efficiency structures") + t["structures"]
+        + caption("F. idf of spelling variants on the mixed-script corpus, with and without pooled df") + t["idf"]
+        + '<div class="two">' + figure("../../results/fig_zipf.png", "<b>G.</b> Zipf plot of the corpus.")
+        + figure("../../results/fig_idf_hist.png", "<b>H.</b> idf distribution of the vocabulary.") + "</div>"
     )
